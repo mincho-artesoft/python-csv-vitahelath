@@ -3,31 +3,32 @@
 generate_swift_food_full.py
 
 Конвертира foods_full_merged.csv →
-   • FoodEnums.swift   – енумите за категориалните колони
-   • foods.json        – компактeн JSON, готов за seed към SwiftData
+   • FoodEnums.swift – енумите за категориалните колони
+   • foods.json      – компактeн JSON, готов за seed към SwiftData
 
 Използване:
     python generate_swift_food_full.py foods_full_merged.csv SwiftOut/
 """
-
 from __future__ import annotations
 import pandas as pd
 import re, sys, json
 from pathlib import Path
 
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 # 1️⃣  I/O
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("foods_full_merged.csv")
 OUT_DIR  = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("SwiftOut")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 # 2️⃣  Load CSV
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 df = pd.read_csv(CSV_PATH, low_memory=False)
 
+# Категориални колони (всички ще станат enum-и)
 CAT_COLS = [
+    "category",
     "Food Group",
     "Macronutrient Focus",
     "Processing Level",
@@ -37,8 +38,9 @@ CAT_COLS = [
     "allergens",
 ]
 
-# ➜ Food Group и Macronutrient Focus вече също се разделят по “;” или “,”
+# Кои колони се разделят на множество етикети
 SPLIT_PAT = {
+    "category":            r"\s*[;,]\s*",
     "Food Group":          r"\s*[;,]\s*",
     "Macronutrient Focus": r"\s*[;,]\s*",
     "Culinary Usage":      r"\s*[;,]\s*",
@@ -46,13 +48,12 @@ SPLIT_PAT = {
     "allergens":           r"\s*,\s*",
 }
 
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 # 3️⃣  Helpers
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 def swift_case_name(s: str) -> str:
-    """Преобразува низ в camelCase подходящ за Swift case."""
     cleaned = re.sub(r"[^0-9a-zA-Z\s]", " ", s)
-    parts = [p for p in re.split(r"\s+", cleaned) if p]
+    parts   = [p for p in re.split(r"\s+", cleaned) if p]
     if not parts:
         return "unknown"
     camel = parts[0].lower() + "".join(p.title() for p in parts[1:])
@@ -61,7 +62,6 @@ def swift_case_name(s: str) -> str:
 UNIT_MAP = dict(UG="µg", MG="mg", G="g", KCAL="kcal")
 
 def unit_of(col: str) -> str:
-    """Връща мерната единица от името на колоната, конвертирана в четим вид."""
     m = re.findall(r"\(([^()]+)\)", col)
     if not m:
         return ""
@@ -73,9 +73,9 @@ def unit_of(col: str) -> str:
 def to_float(x):
     return None if pd.isna(x) else float(x)
 
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 # 4️⃣  Build enums
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 enum_vals = {c: set() for c in CAT_COLS}
 for _, row in df.iterrows():
     for col in CAT_COLS:
@@ -90,6 +90,7 @@ for _, row in df.iterrows():
             enum_vals[col].add(str(cell).strip())
 
 ENUM_TYPES = {
+    "category":            "FoodCategory",
     "Food Group":          "FoodGroup",
     "Macronutrient Focus": "MacronutrientFocus",
     "Processing Level":    "ProcessingLevel",
@@ -108,11 +109,12 @@ for col in CAT_COLS:
     enum_lines.append("}\n")
 (OUT_DIR / "FoodEnums.swift").write_text("\n".join(enum_lines), encoding="utf-8")
 
-# ────────────────────────────────────────────────────────────────────────────
-# 5️⃣  Nutrient mapping – пълен речник
-# ────────────────────────────────────────────────────────────────────────────
-swift_names = {"id": "id", "name": "name", "category": "category"}
+# ────────────────────────────────────────────────────────────────────────
+# 5️⃣  Nutrient mapping
+# ────────────────────────────────────────────────────────────────────────
+swift_names = {"id": "id", "name": "name"}
 
+# (пълен речник „groups“ – непроменян)
 groups = {
     "macros": [
         ("Carbohydrate, by difference (G)", "carbohydrates"),
@@ -187,30 +189,25 @@ groups = {
         ("Copper, Cu (MG)",    "copper"),
     ],
     "other": [
-        ("Alcohol, ethyl (G)",      "alcoholEthyl"),
-        ("Caffeine (MG)",           "caffeine"),
-        ("Theobromine (MG)",        "theobromine"),
-        ("Choline, total (MG)",     "choline"),
-        ("Cholesterol (MG)",        "cholesterol"),
-        ("Energy (KCAL)",           "energyKcal"),
-        ("Water (G)",               "water"),
-        ("weight (G)",              "weightG"),
+        ("Alcohol, ethyl (G)",  "alcoholEthyl"),
+        ("Caffeine (MG)",       "caffeine"),
+        ("Theobromine (MG)",    "theobromine"),
+        ("Choline, total (MG)", "choline"),
+        ("Cholesterol (MG)",    "cholesterol"),
+        ("Energy (KCAL)",       "energyKcal"),
+        ("Water (G)",           "water"),
+        ("weight (G)",          "weightG"),
     ],
 }
 
-# добавяме всички CSV-колони ⇢ името на property-то
 for grp in groups.values():
     for csv_col, swift_prop in grp:
         swift_names[csv_col] = swift_prop
 
-# ────────────────────────────────────────────────────────────────────────────
-# 6️⃣  Row → dict (Codable shape)
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
+# 6️⃣  Row → dict
+# ────────────────────────────────────────────────────────────────────────
 def enum_json(col: str, cell):
-    """
-    • Ако колоната е в SPLIT_PAT → връща списък (list[str]) или None.
-    • Иначе → връща низ (str) или None.
-    """
     if pd.isna(cell):
         return None
     if col in SPLIT_PAT:
@@ -218,15 +215,13 @@ def enum_json(col: str, cell):
     return str(cell).strip()
 
 def nut(row, csv_col):
-    """Връща дикт с value+unit, готов за JSON."""
     return {"value": to_float(row[csv_col]), "unit": unit_of(csv_col)}
 
 def row_to_dict(row):
     d = {
         "id": int(row["id"]),
         "name": row["name"],
-        "category": row["category"],
-
+        "category": enum_json("category", row["category"]),
         "foodGroup":          enum_json("Food Group", row["Food Group"]),
         "macronutrientFocus": enum_json("Macronutrient Focus", row["Macronutrient Focus"]),
         "processingLevel":    enum_json("Processing Level", row["Processing Level"]),
@@ -236,28 +231,18 @@ def row_to_dict(row):
         "allergens":          enum_json("allergens", row["allergens"]),
     }
 
-    d["macronutrients"] = {
-        swift_names[c]: nut(row, c) for c, _ in groups["macros"]
-    }
-    d["lipids"] = {
-        swift_names[c]: nut(row, c)
-        for sub in ("lipids_main", "sfa", "mufa", "pufa")
-        for c, _ in groups[sub]
-    }
-    d["vitamins"] = {
-        swift_names[c]: nut(row, c) for c, _ in groups["vitamins"]
-    }
-    d["minerals"] = {
-        swift_names[c]: nut(row, c) for c, _ in groups["minerals"]
-    }
-    d["other"] = {
-        swift_names[c]: nut(row, c) for c, _ in groups["other"]
-    }
+    d["macronutrients"] = {swift_names[c]: nut(row, c) for c, _ in groups["macros"]}
+    d["lipids"]        = {swift_names[c]: nut(row, c)
+                          for sub in ("lipids_main", "sfa", "mufa", "pufa")
+                          for c, _ in groups[sub]}
+    d["vitamins"]      = {swift_names[c]: nut(row, c) for c, _ in groups["vitamins"]}
+    d["minerals"]      = {swift_names[c]: nut(row, c) for c, _ in groups["minerals"]}
+    d["other"]         = {swift_names[c]: nut(row, c) for c, _ in groups["other"]}
     return d
 
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 # 7️⃣  Write foods.json
-# ────────────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────────
 print("• Writing foods.json")
 records = [row_to_dict(r) for _, r in df.iterrows()]
 with (OUT_DIR / "foods.json").open("w", encoding="utf-8") as fp:
