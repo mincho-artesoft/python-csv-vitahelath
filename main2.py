@@ -1,48 +1,27 @@
+#!/usr/bin/env python3
 import pandas as pd
-import re
+from pathlib import Path
 
-# 1) Зареждаме CSV файла
-df = pd.read_csv("foods_full_merged.csv", low_memory=False)
+# Пътища
+INPUT_CSV = Path("foods_full_merged.csv")
+OUTPUT_CSV = Path("foods_full_merged_no_extra.csv")
 
-# 2) Колоните, които ни интересуват
-columns = [
-    "Food Group",
-    "Macronutrient Focus",
-    "Processing Level",
+# Зареждаме CSV
+df = pd.read_csv(INPUT_CSV, low_memory=False)
+
+# Колони за премахване
+cols_to_remove = [
     "Culinary Usage",
+    "Food Group",
     "Health Impact",
-    "diets",
-    "allergens",
+    "Macronutrient Focus",
+    "Processing Level"
 ]
 
-# 3) Дефинираме как да разделяме клетките по колони
-split_patterns = {
-    # запетая
-    "allergens": r"\s*,\s*",
-    "diets":     r"\s*,\s*",
-    # запетая ИЛИ ;
-    "Culinary Usage":     r"\s*[;,]\s*",
-    "Macronutrient Focus": r"\s*[;,]\s*",
-    "Food Group":          r"\s*[;,]\s*",
-}
+# Премахваме ги, ако съществуват
+df = df.drop(columns=[c for c in cols_to_remove if c in df.columns])
 
-# 4) Събираме уникалните стойности
-unique_vals = {col: set() for col in columns}
+# Записваме обратно
+df.to_csv(OUTPUT_CSV, index=False)
 
-for _, row in df[columns].iterrows():
-    for col in columns:
-        val = row[col]
-        if pd.isna(val):
-            continue
-
-        txt = str(val)
-        if col in split_patterns:                # трябва ли да се дели?
-            parts = re.split(split_patterns[col], txt)
-            unique_vals[col].update(p for p in parts if p)
-        else:
-            unique_vals[col].add(txt)
-
-# 5) Отпечатваме резултата
-for col in columns:
-    for v in sorted(unique_vals[col]):
-        print(f"{col} -> {v}")
+print(f"✅ Новият CSV е записан в: {OUTPUT_CSV}")

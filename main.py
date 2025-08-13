@@ -3,7 +3,7 @@
 generate_swift_food_full.py
 
 Конвертира foods_full_merged.csv →
-   • FoodEnums.swift – енумите за категориалните колони
+   • FoodEnums.swift – енумите за категориалните колони (само category/diets/allergens)
    • foods.json      – компактeн JSON, готов за seed към SwiftData
 
 Използване:
@@ -26,26 +26,18 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 # ────────────────────────────────────────────────────────────────────────
 df = pd.read_csv(CSV_PATH, low_memory=False)
 
-# Категориални колони (всички ще станат enum-и)
+# Категориални колони – използваме САМО тези три
 CAT_COLS = [
     "category",
-    "Food Group",
-    "Macronutrient Focus",
-    "Processing Level",
-    "Culinary Usage",
-    "Health Impact",
     "diets",
     "allergens",
 ]
 
 # Кои колони се разделят на множество етикети
 SPLIT_PAT = {
-    "category":            r"\s*[;,]\s*",
-    "Food Group":          r"\s*[;,]\s*",
-    "Macronutrient Focus": r"\s*[;,]\s*",
-    "Culinary Usage":      r"\s*[;,]\s*",
-    "diets":               r"\s*,\s*",
-    "allergens":           r"\s*,\s*",
+    "category": r"\s*[;,]\s*",
+    "diets":    r"\s*,\s*",
+    "allergens":r"\s*,\s*",
 }
 
 # ────────────────────────────────────────────────────────────────────────
@@ -74,12 +66,12 @@ def to_float(x):
     return None if pd.isna(x) else float(x)
 
 # ────────────────────────────────────────────────────────────────────────
-# 4️⃣  Build enums
+# 4️⃣  Build enums (само за запазените колони)
 # ────────────────────────────────────────────────────────────────────────
 enum_vals = {c: set() for c in CAT_COLS}
 for _, row in df.iterrows():
     for col in CAT_COLS:
-        cell = row[col]
+        cell = row.get(col)
         if pd.isna(cell):
             continue
         if col in SPLIT_PAT:
@@ -90,14 +82,9 @@ for _, row in df.iterrows():
             enum_vals[col].add(str(cell).strip())
 
 ENUM_TYPES = {
-    "category":            "FoodCategory",
-    "Food Group":          "FoodGroup",
-    "Macronutrient Focus": "MacronutrientFocus",
-    "Processing Level":    "ProcessingLevel",
-    "Culinary Usage":      "CulinaryUsage",
-    "Health Impact":       "HealthImpact",
-    "diets":               "Diet",
-    "allergens":           "Allergen",
+    "category":  "FoodCategory",
+    "diets":     "Diet",
+    "allergens": "Allergen",
 }
 
 print("• Writing FoodEnums.swift")
@@ -215,20 +202,16 @@ def enum_json(col: str, cell):
     return str(cell).strip()
 
 def nut(row, csv_col):
-    return {"value": to_float(row[csv_col]), "unit": unit_of(csv_col)}
+    return {"value": to_float(row.get(csv_col)), "unit": unit_of(csv_col)}
 
 def row_to_dict(row):
     d = {
         "id": int(row["id"]),
         "name": row["name"],
-        "category": enum_json("category", row["category"]),
-        "foodGroup":          enum_json("Food Group", row["Food Group"]),
-        "macronutrientFocus": enum_json("Macronutrient Focus", row["Macronutrient Focus"]),
-        "processingLevel":    enum_json("Processing Level", row["Processing Level"]),
-        "culinaryUsage":      enum_json("Culinary Usage", row["Culinary Usage"]),
-        "healthImpact":       enum_json("Health Impact", row["Health Impact"]),
-        "diets":              enum_json("diets", row["diets"]),
-        "allergens":          enum_json("allergens", row["allergens"]),
+        "category": enum_json("category", row.get("category")),
+        # Премахнати: foodGroup/macronutrientFocus/processingLevel/culinaryUsage/healthImpact
+        "diets":     enum_json("diets", row.get("diets")),
+        "allergens": enum_json("allergens", row.get("allergens")),
     }
 
     d["macronutrients"] = {swift_names[c]: nut(row, c) for c, _ in groups["macros"]}
