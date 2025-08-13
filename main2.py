@@ -1,27 +1,14 @@
-#!/usr/bin/env python3
 import pandas as pd
-from pathlib import Path
 
-# Пътища
-INPUT_CSV = Path("foods_full_merged.csv")
-OUTPUT_CSV = Path("foods_full_merged_no_extra.csv")
+# Път до CSV файла
+file_path = "foods_union_all_cols_no_max_age_combined_no_d2d3_b12_no_mufa_pufa_renamed.csv"
 
-# Зареждаме CSV
-df = pd.read_csv(INPUT_CSV, low_memory=False)
+# Четене на CSV
+df = pd.read_csv(file_path)
 
-# Колони за премахване
-cols_to_remove = [
-    "Culinary Usage",
-    "Food Group",
-    "Health Impact",
-    "Macronutrient Focus",
-    "Processing Level"
-]
+# Принтиране на имената на колоните в азбучен ред
+for col in sorted(df.columns):
+    print(col)
 
-# Премахваме ги, ако съществуват
-df = df.drop(columns=[c for c in cols_to_remove if c in df.columns])
-
-# Записваме обратно
-df.to_csv(OUTPUT_CSV, index=False)
-
-print(f"✅ Новият CSV е записан в: {OUTPUT_CSV}")
+# Принтиране на броя на колоните
+print(f"\nОбщ брой колони: {len(df.columns)}")
