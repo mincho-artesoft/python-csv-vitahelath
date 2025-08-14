@@ -1,4 +1,4 @@
-// Auto-generated from foods_union_all_cols_no_max_age_combined_no_d2d3_b12_no_mufa_pufa_renamed.csv
+// Auto-generated from foods_union_all_cols_no_max_age_combined_no_d2d3_b12_no_mufa_pufa_renamed__zeros_except_min_age_cleared.csv
 import Foundation
 
 public enum FoodCategory: String, Codable, CaseIterable {
