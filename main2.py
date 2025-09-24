@@ -1,24 +1,32 @@
-#!/usr/bin/env python3
 import pandas as pd
 
-in_path = "foods_union_all_cols_no_max_age_combined_no_d2d3_b12_no_mufa_pufa_renamed.csv"
-out_path = "foods_union_all_cols_no_max_age_combined_no_d2d3_b12_no_mufa_pufa_renamed__zeros_except_min_age_cleared.csv"
+# Пътища към файловете
+path_names = "111_without_asd_names.csv"
+path_full  = "foods_union_all_cols_no_max_age_combined_no_d2d3_b12_no_mufa_pufa_renamed__zeros_except_min_age_cleared.csv"
+path_out   = "foods_filtered_keep_only_names_from_111.csv"
 
-# Чети всичко като текст, за да не стават NaN/float автом.
-df = pd.read_csv(in_path, dtype=str, keep_default_na=False, na_filter=False, low_memory=False)
+# 1) Четем списъка с позволени имена (id,name)
+names_df = pd.read_csv(path_names, encoding="utf-8-sig", dtype=str, usecols=["id","name"])
+allowed_names = (
+    names_df["name"]
+    .dropna()
+    .astype(str)
+    .str.strip()
+    .unique()
+)
 
-# Намери точната(ите) колона(и) за пропускане (robust към регистър и интервали в имената)
-skip_cols = [c for c in df.columns if c.strip().lower() == "min_age_months"]
+# 2) Четем големия файл
+full_df = pd.read_csv(path_full, encoding="utf-8-sig")
 
-# Колони за обработка = всички минус skip
-target_cols = [c for c in df.columns if c not in skip_cols]
+# 3) Филтър: пазим само редове, чието name е в allowed_names
+mask = full_df["name"].astype(str).str.strip().isin(allowed_names)
+filtered_df = full_df[mask].copy()
 
-# Шаблон за "само нули" (вкл. +0, -0, 0.0, 0,00, с интервали)
-zero_pattern = r'^\s*[+-]?0+(?:[.,]0+)?\s*$'
+# 4) Запис
+filtered_df.to_csv(path_out, index=False, encoding="utf-8-sig")
 
-# Замяна само в target_cols
-df[target_cols] = df[target_cols].replace(to_replace=zero_pattern, value="", regex=True)
-
-# Запис
-df.to_csv(out_path, index=False)
-print(f"Готово. Записано в: {out_path}")
+# (незадължително) кратка статистика в конзолата
+print(f"Всички редове: {len(full_df)}")
+print(f"Останали редове: {len(filtered_df)}")
+print(f"Премахнати редове: {len(full_df) - len(filtered_df)}")
+print(f"Изходен файл: {path_out}")

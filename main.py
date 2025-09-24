@@ -18,7 +18,7 @@ from pathlib import Path
 # ────────────────────────────────────────────────────────────────────────
 # 1) I/O
 # ────────────────────────────────────────────────────────────────────────
-CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("foods_union_all_cols_no_max_age_combined_no_d2d3_b12_no_mufa_pufa_renamed__zeros_except_min_age_cleared.csv")
+CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("foods_filtered_keep_only_names_from_111.csv")
 OUT_DIR  = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("SwiftOut")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
