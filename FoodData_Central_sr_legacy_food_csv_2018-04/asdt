@@ -7,7 +7,7 @@
   } >> merged_output.txt
 done
 
-find . -type d \( -name Analytics -o -name Subscriptions -o -name Storage -o -name Exercise -o -name TrainingPlan -o -name Fitness -o -name ShoppingList -o -name Settings -o -name Pods -o -name build -o -name node_modules -o -name .git \) -prune -o \
+find . -type d \( -name Analytics -o -name Subscriptions -o -name Nutrient -o -name Storage -o -name Exercise -o -name TrainingPlan -o -name Fitness -o -name ShoppingList -o -name Settings -o -name Pods -o -name build -o -name node_modules -o -name .git \) -prune -o \
        -type f \( -name '*.swift' -o -name '*.metal' \) -print0 |
 while IFS= read -r -d '' file; do
   fullpath=$(realpath "$file")
@@ -17,6 +17,131 @@ while IFS= read -r -d '' file; do
     printf '\n\n'
   } >> merged_output.txt
 done
-Subscriptions Storage ShoppingList Settings App Ref
 
 
+find . -type d \( -name Analytics -o -name Subscriptions -o -name Nutrient -o -name Storage -o -name ShoppingList -o -name Settings -o -name Pods -o -name build -o -name node_modules -o -name .git \) -prune -o \
+       -type f \( -name '*.swift' -o -name '*.metal' \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done
+
+
+
+
+find . -type d \( -name Analytics -o -name Subscriptions -o -name Nutrient -o -name Food -o -name Meal -o -name Storage -o -name ShoppingList -o -name Settings -o -name Pods -o -name build -o -name node_modules -o -name .git \) -prune -o \
+       -type f \( -name '*.swift' -o -name '*.metal' \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done
+
+
+
+find . -type d \( -name Subscriptions -o -name Nutrient -o -name Storage -o -name ShoppingList -o -name Settings -o -name Pods -o -name build -o -name node_modules -o -name .git \) -prune -o \
+       -type f \( -name '*.swift' -o -name '*.metal' \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done
+
+
+
+find . -type d \( -name Analytics -o -name Subscriptions -o -name Nutrient -o -name Food -o -name Meal -o -name Storage -o -name Settings -o -name Pods -o -name build -o -name node_modules -o -name .git \) -prune -o \
+       -type f \( -name '*.swift' -o -name '*.metal' \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done
+BarcodeScanner
+Profile
+find . -type d \( -name Analytics -o -name ShoppingList -o -name Profile -o -name Subscriptions -o -name BarcodeScanner -o -name Storage -o -name Settings -o -name Pods -o -name build -o -name node_modules -o -name .git \) -prune -o \
+       -type f \( -name '*.swift' -o -name '*.metal' \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done
+
+
+/////////////////////////////////
+
+
+find . -type d \( -name Analytics -o -name ShoppingList -o -name Profile -o -name Subscriptions -o -name Storage -o -name Settings -o -name Pods -o -name build -o -name node_modules -o -name .git \) -prune -o \
+       -type f \( -name '*.swift' -o -name '*.metal' \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done
+
+Analytics
+BarcodeScanner
+Calendar
+CustomViews
+Exercise
+Fitness
+Food
+Intents
+Meal
+Nutrient
+Profile
+Prompt
+Settings
+ShoppingList
+Storage
+Subscriptions
+TrainingPlan
+
+find . \
+  -type d \
+  \( \
+    -name AI \
+    -o -name BarcodeScanner \
+    -o -name Intents \
+    -o -name Prompt \
+    -o -name Settings \
+    -o -name ShoppingList \
+    -o -name Storage \
+    -o -name Subscriptions \
+    -o -name TrainingPlan \
+    -o -name Pods \
+    -o -name build \
+    -o -name node_modules \
+    -o -name .git \
+  \) -prune -o \
+  -type f \
+  \( \
+    -name '*.swift' \
+    -o -name '*.metal' \
+  \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done

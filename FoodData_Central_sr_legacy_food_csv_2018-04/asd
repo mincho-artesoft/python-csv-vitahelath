@@ -1,83 +1,2799 @@
+import SwiftData
 import Foundation
+import SwiftUI
 
-public enum Sport: String, Codable, CaseIterable, Identifiable, SelectableItem {
-    public var id: String { self.rawValue }
-    public var name: String { self.rawValue }
+@Model
+public final class FoodItem: Identifiable  {
 
-    public var iconName: String? {
-        self.rawValue.lowercased()
-            .replacingOccurrences(of: "/", with: "-")
-            .replacingOccurrences(of: " ", with: "-")
-    }
-    // --- END OF CHANGE ---
+    #Index<FoodItem>([\.name], [\.isUserAdded, \.isRecipe], [\.nameNormalized])
+
+    // MARK: – Basic
+    @Attribute(.unique) public var id: Int
+
+    public var searchTokens: [String] = []
+    public var searchTokens2: [String] = []
+
+      public var name: String {
+          didSet {
+              self.nameNormalized = name.foldedSearchKey
+              self.searchTokens = FoodItem.makeTokens(from: name)
+              self.searchTokens2 = FoodItem.makeTokens2(from: name)
+          }
+      }
     
-    public var iconText: String? { nil }
+    public var minAgeMonths: Int = 0
+    public var nameNormalized: String
+    public var category: [FoodCategory]?
 
-    case aerobics = "Aerobics"
-       case agilityTraining = "Agility Training"
-       case americanFootball = "American Football"
-       case animalFlow = "Animal Flow"
-       case armWrestling = "Arm Wrestling"
-       case athletics = "Athletics"
-       case balanceTraining = "Balance Training"
-       case barre = "Barre"
-       case baseball = "Baseball"
-       case basketball = "Basketball"
-       case beginners = "Beginners"
-       case bodybuilding = "Bodybuilding"
-       case boxing = "Boxing"
-       case breakdancing = "Breakdancing"
-       case calisthenics = "Calisthenics"
-       case capoeira = "Capoeira"
-       case cardio = "Cardio"
-       case cheerleading = "Cheerleading"
-       case circuitTraining = "Circuit Training"
-       case crossfit = "Crossfit"
-       case cycling = "Cycling"
-       case dance = "Dance"
-       case enduranceSports = "Endurance Sports"
-       case fitness = "Fitness"
-       case football = "Football"
-       case golf = "Golf"
-       case gymnastics = "Gymnastics"
-       case hiit = "HIIT"
-       case hiking = "Hiking"
-       case hockey = "Hockey"
-       case homeWorkouts = "Home Workouts"
-       case iceSkating = "Ice Skating"
-       case judo = "Judo"
-       case jumpRope = "Jump Rope"
-       case kayaking = "Kayaking"
-       case kettlebellSport = "Kettlebell Sport"
-       case kettlebellTraining = "Kettlebell Training"
-       case kickboxing = "Kickboxing"
-       case martialArts = "Martial Arts"
-       case militaryTraining = "Military Training"
-       case mobility = "Mobility"
-       case obstacleCourseRacing = "Obstacle Course Racing"
-       case olympicWeightlifting = "Olympic Weightlifting"
-       case parkour = "Parkour"
-       case partnerTraining = "Partner Training"
-       case pilates = "Pilates"
-       case plyometrics = "Plyometrics"
-       case rehabilitation = "Rehabilitation"
-       case rockClimbing = "Rock Climbing"
-       case rollerSkating = "Roller Skating"
-       case rotationalSports = "Rotational Sports"
-       case rowing = "Rowing"
-       case running = "Running"
-       case skateboarding = "Skateboarding"
-       case skiing = "Skiing"
-       case soccer = "Soccer"
-       case speedSkating = "Speed Skating"
-       case sportsPerformance = "Sports Performance"
-       case strengthTraining = "Strength Training"
-       case surfing = "Surfing"
-       case suspensionTraining = "Suspension Training"
-       case swimming = "Swimming"
-       case tennis = "Tennis"
-       case triathlon = "Triathlon"
-       case volleyball = "Volleyball"
-       case wrestling = "Wrestling"
-       case yoga = "Yoga"
+    public var isRecipe: Bool = false
+    public var isMenu: Bool = false
+    public var isUserAdded: Bool = true
+    public var isFavorite: Bool = false
+
+    // MARK: – Tags
+    @Relationship(deleteRule: .nullify)
+     public var diets: [Diet]?
+
+    public var allergens: [Allergen]?
+
+    // MARK: – Nutrition
+    @Relationship(deleteRule: .cascade) public var macronutrients: MacronutrientsData?
+    @Relationship(deleteRule: .cascade) public var lipids:         LipidsData?
+    @Relationship(deleteRule: .cascade) public var vitamins:       VitaminsData?
+    @Relationship(deleteRule: .cascade) public var minerals:       MineralsData?
+    @Relationship(deleteRule: .cascade) public var other:          OtherCompoundsData?
+    @Relationship(deleteRule: .cascade) public var aminoAcids:     AminoAcidsData?
+    @Relationship(deleteRule: .cascade) public var carbDetails:    CarbDetailsData?
+    @Relationship(deleteRule: .cascade) public var sterols:        SterolsData?
+
+    // MARK: – Media & meta
+    @Attribute(.externalStorage) public var photo: Data?
+    @Relationship(deleteRule: .cascade) public var gallery: [FoodPhoto]?
+    public var prepTimeMinutes: Int?
+    public var itemDescription: String?
+
+    // MARK: – Recipe links
+    @Relationship(deleteRule: .cascade)
+    public var ingredients: [IngredientLink]?
+
+    @Relationship(deleteRule: .cascade, inverse: \StorageItem.food)
+    var stockEntries: [StorageItem]? = []
+
+    @Relationship(deleteRule: .cascade, inverse: \MealLogStorageLink.food)
+    public var mealLogLinks: [MealLogStorageLink]? = []
+
+    @Relationship(deleteRule: .cascade, inverse: \StorageTransaction.food)
+    public var storageTransactions: [StorageTransaction]? = []
+    
+    // +++ НАЧАЛО НА ПРОМЯНАТА (1/1) +++
+    @Relationship(inverse: \Node.linkedFoods)
+    public var nodes: [Node]? = []
+    // +++ КРАЙ НА ПРОМЯНАТА (1/1) +++
+
+    static func makeTokens(from name: String) -> [String] {
+        // normalize
+        let normalized = name
+            .lowercased()
+            .replacingOccurrences(of: "[-/_]", with: " ", options: .regularExpression)
+            .folding(options: .diacriticInsensitive, locale: .current)
+
+        // split to raw words
+        let raw = normalized.split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+            .map(String.init)
+            .filter { !$0.isEmpty }
+
+        // drop stopwords/negators (kept small and domain-aware)
+        let stop: Set<String> = [
+            "and","or","with","without","in","of","the","a","an",
+            "style","type","made","from","plus","no","low","reduced"
+        ]
+        let negators: Set<String> = ["excluding","except","without","no"]
+        let words = raw.filter { !stop.contains($0) }
+
+        // unigrams
+        var tokens = words
+
+        // n-grams (bigrams, trigrams)
+        if words.count >= 2 {
+            for i in 0..<(words.count-1) {
+                tokens.append(words[i] + " " + words[i+1])
+            }
+            // end bigrams
+        }
+        if words.count >= 3 {
+            for i in 0..<(words.count-2) {
+                tokens.append(words[i] + " " + words[i+1] + " " + words[i+2])
+            }
+        }
+
+        // keep negator markers as single tokens so we can detect them later in scoring
+        tokens.append(contentsOf: raw.filter { negators.contains($0) })
+
+        return tokens
+    }
+    
+    static func makeTokens2(from name: String) -> [String] {
+        return name
+          .lowercased()
+          .folding(options: .diacriticInsensitive, locale: .current)
+          .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+          .map { String($0) }
+    }
+    // MARK: – Init
+    public init(
+        id: Int,
+        name: String,
+        category: [FoodCategory]? = nil,
+        isRecipe: Bool = false,
+        isMenu: Bool = false,
+        isUserAdded: Bool = true,
+        diets: [Diet]? = nil,
+        allergens: [Allergen]? = nil,
+        photo: Data? = nil,
+        gallery: [FoodPhoto]? = nil,
+        prepTimeMinutes: Int? = nil,
+        itemDescription: String? = nil,
+        macronutrients: MacronutrientsData? = nil,
+        lipids: LipidsData? = nil,
+        vitamins: VitaminsData? = nil,
+        minerals: MineralsData? = nil,
+        other: OtherCompoundsData? = nil,
+        aminoAcids: AminoAcidsData? = nil,
+        carbDetails: CarbDetailsData? = nil,
+        sterols: SterolsData? = nil,
+        ingredients: [IngredientLink]? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.nameNormalized = name.foldedSearchKey
+        self.searchTokens = FoodItem.makeTokens(from: name) // Tokenization on creation
+        self.searchTokens2 = FoodItem.makeTokens2(from: name) // Tokenization on creation
+        self.category = category
+        self.isRecipe = isRecipe
+        self.isMenu = isMenu
+        self.isUserAdded = isUserAdded
+        self.diets = diets ?? []
+        self.allergens = allergens ?? []
+        self.photo = photo
+        self.gallery = gallery
+        self.prepTimeMinutes = prepTimeMinutes
+        self.itemDescription = itemDescription
+        self.macronutrients = macronutrients
+        self.lipids = lipids
+        self.vitamins = vitamins
+        self.minerals = minerals
+        self.other = other
+        self.aminoAcids = aminoAcids
+        self.carbDetails = carbDetails
+        self.sterols = sterols
+        self.ingredients = ingredients
+    }
 }
+
+// --- START OF CORRECTION ---
+// Add Hashable conformance based on the unique `id`.
+extension FoodItem: Hashable {
+    public static func == (lhs: FoodItem, rhs: FoodItem) -> Bool {
+        return lhs.id == rhs.id && lhs.persistentModelID == rhs.persistentModelID
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+// --- END OF CORRECTION ---
+
+extension FoodItem {
+
+    // MARK: - Nutrition Aggregation (RECURSIVE)
+    static func aggregatedNutrition(for item: FoodItem) -> (
+        macros: MacronutrientsData?,
+        lipids: LipidsData?,
+        vitamins: VitaminsData?,
+        minerals: MineralsData?,
+        other: OtherCompoundsData?,
+        aminoAcids: AminoAcidsData?,
+        carbDetails: CarbDetailsData?,
+        sterols: SterolsData?
+    ) {
+        guard item.isRecipe || item.isMenu, let links = item.ingredients, !links.isEmpty else {
+            return (item.macronutrients, item.lipids, item.vitamins, item.minerals, item.other, item.aminoAcids, item.carbDetails, item.sterols)
+        }
+
+        let m  = MacronutrientsData(); let l  = LipidsData(); let v  = VitaminsData()
+        let mi = MineralsData(); let o  = OtherCompoundsData(); let a  = AminoAcidsData()
+        let cd = CarbDetailsData(); let s  = SterolsData()
+
+        func add(_ tgt: inout Nutrient?, _ src: Nutrient?, _ k: Double) {
+            guard let src, let value = src.value, value > 0 else { return }
+            if tgt == nil { tgt = Nutrient(value: value * k, unit: src.unit) }
+            else if tgt!.unit == src.unit { tgt!.value! += value * k }
+        }
+
+        for link in links {
+            guard let ing = link.food else { continue }
+            let source = aggregatedNutrition(for: ing)
+            let base = ing.referenceWeightG
+            guard base > 0 else { continue }
+            let f = link.grams / base
+
+            if let x = source.macros { add(&m.carbohydrates, x.carbohydrates, f); add(&m.protein, x.protein, f); add(&m.fat, x.fat, f); add(&m.fiber, x.fiber, f); add(&m.totalSugars, x.totalSugars, f) }
+            if let x = source.lipids { add(&l.totalSaturated, x.totalSaturated, f); add(&l.totalMonounsaturated, x.totalMonounsaturated, f); add(&l.totalPolyunsaturated, x.totalPolyunsaturated, f); add(&l.totalTrans, x.totalTrans, f); add(&l.totalTransMonoenoic, x.totalTransMonoenoic, f); add(&l.totalTransPolyenoic, x.totalTransPolyenoic, f); add(&l.sfa4_0, x.sfa4_0, f); add(&l.sfa6_0, x.sfa6_0, f); add(&l.sfa8_0, x.sfa8_0, f); add(&l.sfa10_0, x.sfa10_0, f); add(&l.sfa12_0, x.sfa12_0, f); add(&l.sfa13_0, x.sfa13_0, f); add(&l.sfa14_0, x.sfa14_0, f); add(&l.sfa15_0, x.sfa15_0, f); add(&l.sfa16_0, x.sfa16_0, f); add(&l.sfa17_0, x.sfa17_0, f); add(&l.sfa18_0, x.sfa18_0, f); add(&l.sfa20_0, x.sfa20_0, f); add(&l.sfa22_0, x.sfa22_0, f); add(&l.sfa24_0, x.sfa24_0, f); add(&l.mufa14_1, x.mufa14_1, f); add(&l.mufa15_1, x.mufa15_1, f); add(&l.mufa16_1, x.mufa16_1, f); add(&l.mufa17_1, x.mufa17_1, f); add(&l.mufa18_1, x.mufa18_1, f); add(&l.mufa20_1, x.mufa20_1, f); add(&l.mufa22_1, x.mufa22_1, f); add(&l.mufa24_1, x.mufa24_1, f); add(&l.tfa16_1_t, x.tfa16_1_t, f); add(&l.tfa18_1_t, x.tfa18_1_t, f); add(&l.tfa22_1_t, x.tfa22_1_t, f); add(&l.tfa18_2_t, x.tfa18_2_t, f); add(&l.pufa18_2, x.pufa18_2, f); add(&l.pufa18_3, x.pufa18_3, f); add(&l.pufa18_4, x.pufa18_4, f); add(&l.pufa20_2, x.pufa20_2, f); add(&l.pufa20_3, x.pufa20_3, f); add(&l.pufa20_4, x.pufa20_4, f); add(&l.pufa20_5, x.pufa20_5, f); add(&l.pufa21_5, x.pufa21_5, f); add(&l.pufa22_4, x.pufa22_4, f); add(&l.pufa22_5, x.pufa22_5, f); add(&l.pufa22_6, x.pufa22_6, f); add(&l.pufa2_4,  x.pufa2_4, f) }
+            if let x = source.vitamins { add(&v.vitaminA_RAE, x.vitaminA_RAE, f); add(&v.retinol, x.retinol, f); add(&v.caroteneAlpha, x.caroteneAlpha, f); add(&v.caroteneBeta, x.caroteneBeta, f); add(&v.cryptoxanthinBeta, x.cryptoxanthinBeta, f); add(&v.luteinZeaxanthin,  x.luteinZeaxanthin,  f); add(&v.lycopene, x.lycopene, f); add(&v.vitaminB1_Thiamin, x.vitaminB1_Thiamin, f); add(&v.vitaminB2_Riboflavin, x.vitaminB2_Riboflavin, f); add(&v.vitaminB3_Niacin, x.vitaminB3_Niacin, f); add(&v.vitaminB5_PantothenicAcid, x.vitaminB5_PantothenicAcid, f); add(&v.vitaminB6, x.vitaminB6, f); add(&v.folateDFE, x.folateDFE, f); add(&v.folateFood, x.folateFood, f); add(&v.folateTotal, x.folateTotal, f); add(&v.folicAcid, x.folicAcid, f); add(&v.vitaminB12, x.vitaminB12, f); add(&v.vitaminC, x.vitaminC, f); add(&v.vitaminD, x.vitaminD, f); add(&v.vitaminE, x.vitaminE, f); add(&v.vitaminK, x.vitaminK, f); add(&v.choline, x.choline, f) }
+            if let x = source.minerals { add(&mi.calcium, x.calcium, f); add(&mi.iron, x.iron, f); add(&mi.magnesium,  x.magnesium, f); add(&mi.phosphorus, x.phosphorus, f); add(&mi.potassium,  x.potassium, f); add(&mi.sodium, x.sodium, f); add(&mi.selenium, x.selenium, f); add(&mi.zinc, x.zinc, f); add(&mi.copper, x.copper, f); add(&mi.manganese, x.manganese, f); add(&mi.fluoride, x.fluoride, f) }
+            if let x = source.other { add(&o.alcoholEthyl, x.alcoholEthyl, f); add(&o.caffeine, x.caffeine, f); add(&o.theobromine,  x.theobromine, f); add(&o.cholesterol,  x.cholesterol,  f); add(&o.energyKcal,   x.energyKcal,   f); add(&o.water, x.water, f); add(&o.weightG, x.weightG, f); add(&o.ash, x.ash, f); add(&o.betaine, x.betaine, f) }
+            if let x = source.aminoAcids { add(&a.alanine, x.alanine, f); add(&a.arginine, x.arginine, f); add(&a.asparticAcid, x.asparticAcid, f); add(&a.cystine, x.cystine, f); add(&a.glutamicAcid, x.glutamicAcid, f); add(&a.glycine, x.glycine, f); add(&a.histidine, x.histidine, f); add(&a.isoleucine, x.isoleucine, f); add(&a.leucine, x.leucine, f); add(&a.lysine, x.lysine, f); add(&a.methionine, x.methionine, f); add(&a.phenylalanine,  x.phenylalanine, f); add(&a.proline, x.proline, f); add(&a.threonine, x.threonine, f); add(&a.tryptophan, x.tryptophan, f); add(&a.tyrosine, x.tyrosine, f); add(&a.valine, x.valine, f); add(&a.serine, x.serine, f); add(&a.hydroxyproline, x.hydroxyproline, f) }
+            if let x = source.carbDetails { add(&cd.starch, x.starch, f); add(&cd.sucrose, x.sucrose, f); add(&cd.glucose,   x.glucose,   f); add(&cd.fructose,  x.fructose,  f); add(&cd.lactose,   x.lactose,   f); add(&cd.maltose,   x.maltose,   f); add(&cd.galactose, x.galactose, f) }
+            if let x = source.sterols { add(&s.phytosterols,   x.phytosterols,   f); add(&s.betaSitosterol, x.betaSitosterol, f); add(&s.campesterol,    x.campesterol,    f); add(&s.stigmasterol,   x.stigmasterol,   f) }
+        }
+
+        return (m, l, v, mi, o, a, cd, s)
+    }
+
+    // MARK: – Public Computed Properties
+    var totalWeightG: Double? {
+        ingredients?.map(\.grams).reduce(0, +)
+    }
+
+    var totalCarbohydrates: Nutrient? { Self.aggregatedNutrition(for: self).macros?.carbohydrates }
+    var totalProtein:       Nutrient? { Self.aggregatedNutrition(for: self).macros?.protein }
+    var totalFat:           Nutrient? { Self.aggregatedNutrition(for: self).macros?.fat }
+    var totalEnergyKcal:    Nutrient? { Self.aggregatedNutrition(for: self).other?.energyKcal }
+
+    public func topVitamins(count n: Int = 2) -> [DisplayableNutrient] {
+        let aggregatedData = Self.aggregatedNutrition(for: self).vitamins
+        return directTop(dataset: aggregatedData, accessMap: vitaminAccess, labelMap: vitaminLabelById, limit: n)
+    }
+
+    public func topMinerals(count n: Int = 2) -> [DisplayableNutrient] {
+        let aggregatedData = Self.aggregatedNutrition(for: self).minerals
+        return directTop(dataset: aggregatedData, accessMap: mineralAccess, labelMap: mineralLabelById, limit: n)
+    }
+    
+    @MainActor public func allLipids(count n: Int = Int.max) -> [DisplayableNutrient] {
+        let aggregatedData = Self.aggregatedNutrition(for: self).lipids
+        return directTop(dataset: aggregatedData, accessMap: lipidAccessForDisplay, labelMap: lipidLabelById, limit: n)
+    }
+
+    @MainActor public func allOtherCompounds(count n: Int = Int.max) -> [DisplayableNutrient] {
+        let aggregatedData = Self.aggregatedNutrition(for: self).other
+        return directTop(dataset: aggregatedData, accessMap: otherAccessForDisplay, labelMap: otherLabelById, limit: n)
+    }
+    
+    @MainActor public func allAminoAcids(count n: Int = Int.max) -> [DisplayableNutrient] {
+        let aggregatedData = Self.aggregatedNutrition(for: self).aminoAcids
+        return directTop(dataset: aggregatedData, accessMap: aminoAccessForDisplay, labelMap: aminoLabelById, limit: n)
+    }
+
+    @MainActor public func allCarbDetails(count n: Int = Int.max) -> [DisplayableNutrient] {
+        let aggregatedData = Self.aggregatedNutrition(for: self).carbDetails
+        return directTop(dataset: aggregatedData, accessMap: carbDetailsAccessForDisplay, labelMap: carbDetailsLabelById, limit: n)
+    }
+
+    @MainActor public func allSterols(count n: Int = Int.max) -> [DisplayableNutrient] {
+        let aggregatedData = Self.aggregatedNutrition(for: self).sterols
+        return directTop(dataset: aggregatedData, accessMap: sterolsAccessForDisplay, labelMap: sterolsLabelById, limit: n)
+    }
+    
+    private func directTop<T>(
+        dataset: T?,
+        accessMap: [String:(T)->Nutrient?],
+        labelMap:  [String:String],
+        limit: Int
+    ) -> [DisplayableNutrient] {
+        guard let data = dataset, let ctx = self.modelContext else { return [] }
+
+        let vitaminsWithColor = (try? ctx.fetch(FetchDescriptor<Vitamin>())) ?? []
+        let mineralsWithColor = (try? ctx.fetch(FetchDescriptor<Mineral>())) ?? []
+        let colorMap = Dictionary(uniqueKeysWithValues: (vitaminsWithColor.map { ($0.id, Color(hex: $0.colorHex)) } + mineralsWithColor.map { ($0.id, Color(hex: $0.colorHex)) }))
+
+        var pool: [DisplayableNutrient] = []
+        for (id, label) in labelMap {
+            guard let getter = accessMap[id],
+                  let nut = getter(data),
+                  let val = nut.value, val > 0,
+                  let unit = nut.unit
+            else { continue }
+
+            let mg = Self.toMg(value: val, unit: unit)
+            let color = colorMap[id]
+
+            pool.append(DisplayableNutrient(name: label,
+                                            value: val,
+                                            unit: unit,
+                                            color: color,
+                                            valueMg: mg))
+        }
+        return pool.sorted { $0.valueMg > $1.valueMg }
+                   .prefix(limit)
+                   .map { $0 }
+    }
+
+    private static func toMg(value: Double, unit: String) -> Double {
+        switch unit.lowercased() {
+        case "g":           return value * 1_000
+        case "µg", "mcg":   return value * 0.001
+        case "mg":          return value
+        default:            return value
+        }
+    }
+    
+    // MARK: - Value & Density Helpers
+    func value(of nutrientID: String) -> (Double, String)? {
+        let aggregated = Self.aggregatedNutrition(for: self)
+        
+        if nutrientID.starts(with: "vit_") {
+            let key = String(nutrientID.dropFirst(4))
+            if let vit = aggregated.vitamins, let n = vitaminAccess[key]?(vit), let v = n.value, let unit = n.unit { return (v, unit) }
+        } else if nutrientID.starts(with: "min_") {
+            let key = String(nutrientID.dropFirst(4))
+            if let min = aggregated.minerals, let n = mineralAccess[key]?(min), let v = n.value, let unit = n.unit { return (v, unit) }
+        }
+        return nil
+    }
+    
+    var referenceWeightG: Double {
+        if isRecipe || isMenu { return totalWeightG ?? 100 }
+        return other?.weightG?.value ?? 100
+    }
+    
+    func macro(_ kp: KeyPath<MacronutrientsData, Nutrient?>) -> Double {
+        let aggregated = Self.aggregatedNutrition(for: self)
+        return aggregated.macros?[keyPath: kp]?.value ?? 0
+    }
+
+    func nutrientDensity(of id: String) -> Double? {
+        guard let (val, _) = value(of: id) else { return nil }
+        let ref = referenceWeightG
+        guard ref > 0 else { return nil }
+        return val / ref
+    }
+
+    func amount(of id: String, grams: Double) -> Double {
+        (nutrientDensity(of: id) ?? 0) * grams
+    }
+
+    func nutrients(for grams: Double) -> [String: Double] {
+        var results: [String: Double] = [:]
+        let allNutrientIDs = vitaminLabelById.keys.map { "vit_\($0)" } + mineralLabelById.keys.map { "min_\($0)" }
+        for id in allNutrientIDs {
+            if let (value, unit) = self.value(of: id) {
+                let referenceWeight = self.referenceWeightG
+                if referenceWeight > 0 {
+                    let valuePerGram = value / referenceWeight
+                    let totalValue = valuePerGram * grams
+                    let totalValueMg = Self.toMg(value: totalValue, unit: unit)
+                    if totalValueMg > 0 {
+                        results[id] = totalValueMg
+                    }
+                }
+            }
+        }
+        return results
+    }
+}
+
+extension FoodItem {
+    func calories(for grams: Double) -> Double {
+        let aggregated = Self.aggregatedNutrition(for: self)
+        
+        if let kcalPerRef = aggregated.other?.energyKcal?.value {
+            let refW = self.referenceWeightG
+            if refW > 0 { return kcalPerRef * grams / refW }
+        }
+
+        let refW = self.referenceWeightG
+        guard refW > 0 else { return 0 }
+
+        let carbsDensity   = (aggregated.macros?.carbohydrates?.value ?? 0) / refW
+        let proteinDensity = (aggregated.macros?.protein?.value ?? 0) / refW
+        let fatDensity     = (aggregated.macros?.fat?.value ?? 0) / refW
+        
+        return (carbsDensity * 4 + proteinDensity * 4 + fatDensity * 9) * grams
+    }
+    
+    static func vitaminKeyPath(for key: String) -> KeyPath<FoodItem, Double?> {
+            switch key {
+            case "vitaminA_RAE": return \.vitamins?.vitaminA_RAE?.value
+            case "retinol": return \.vitamins?.retinol?.value
+            case "caroteneAlpha": return \.vitamins?.caroteneAlpha?.value
+            case "caroteneBeta": return \.vitamins?.caroteneBeta?.value
+            case "cryptoxanthinBeta": return \.vitamins?.cryptoxanthinBeta?.value
+            case "luteinZeaxanthin": return \.vitamins?.luteinZeaxanthin?.value
+            case "lycopene": return \.vitamins?.lycopene?.value
+            case "vitaminB1_Thiamin": return \.vitamins?.vitaminB1_Thiamin?.value
+            case "vitaminB2_Riboflavin": return \.vitamins?.vitaminB2_Riboflavin?.value
+            case "vitaminB3_Niacin": return \.vitamins?.vitaminB3_Niacin?.value
+            case "vitaminB5_PantothenicAcid": return \.vitamins?.vitaminB5_PantothenicAcid?.value
+            case "vitaminB6": return \.vitamins?.vitaminB6?.value
+            case "folateDFE": return \.vitamins?.folateDFE?.value
+            case "folateFood": return \.vitamins?.folateFood?.value
+            case "folateTotal": return \.vitamins?.folateTotal?.value
+            case "folicAcid": return \.vitamins?.folicAcid?.value
+            case "vitaminB12": return \.vitamins?.vitaminB12?.value
+            case "vitaminC": return \.vitamins?.vitaminC?.value
+            case "vitaminD": return \.vitamins?.vitaminD?.value
+            case "vitaminE": return \.vitamins?.vitaminE?.value
+            case "vitaminK": return \.vitamins?.vitaminK?.value
+            case "choline": return \.vitamins?.choline?.value
+            default: return \.vitamins?.vitaminC?.value // Безопасна стойност по подразбиране
+            }
+        }
+
+        /// Връща пълен, сортируем KeyPath от FoodItem до стойността на минерал.
+        static func mineralKeyPath(for key: String) -> KeyPath<FoodItem, Double?> {
+            switch key {
+            case "calcium": return \.minerals?.calcium?.value
+            case "iron": return \.minerals?.iron?.value
+            case "magnesium": return \.minerals?.magnesium?.value
+            case "phosphorus": return \.minerals?.phosphorus?.value
+            case "potassium": return \.minerals?.potassium?.value
+            case "sodium": return \.minerals?.sodium?.value
+            case "selenium": return \.minerals?.selenium?.value
+            case "zinc": return \.minerals?.zinc?.value
+            case "copper": return \.minerals?.copper?.value
+            case "manganese": return \.minerals?.manganese?.value
+            case "fluoride": return \.minerals?.fluoride?.value
+            default: return \.minerals?.iron?.value // Безопасна стойност по подразбиране
+            }
+        }
+    
+    
+    @MainActor
+    func update(from dto: FoodItemDTO, dietMap: [String: Diet]) {
+        // Основни полета
+        self.itemDescription = dto.desctiption
+        self.minAgeMonths = dto.minAgeMonths ?? 0
+        self.category = dto.category
+        self.allergens = dto.allergens
+        
+        // Връзка към диети
+        let fetchedDiets: [Diet]
+        if let dietNames = dto.diets {
+            fetchedDiets = dietNames.compactMap { dietMap[$0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()] }
+        } else {
+            fetchedDiets = []
+        }
+        self.diets = fetchedDiets
+
+        // Макронутриенти
+        if let m = dto.macronutrients {
+            self.macronutrients = MacronutrientsData(carbohydrates: m.carbohydrates, protein: m.protein, fat: m.fat, fiber: m.fiber, totalSugars: m.totalSugars)
+            self.macronutrients?.foodItem = self
+        }
+        
+        // Витамини
+        if let v = dto.vitamins {
+            self.vitamins = VitaminsData(vitaminA_RAE: v.vitaminA_RAE, retinol: v.retinol, caroteneAlpha: v.caroteneAlpha, caroteneBeta: v.caroteneBeta, cryptoxanthinBeta: v.cryptoxanthinBeta, luteinZeaxanthin: v.luteinZeaxanthin, lycopene: v.lycopene, vitaminB1_Thiamin: v.vitaminB1_Thiamin, vitaminB2_Riboflavin: v.vitaminB2_Riboflavin, vitaminB3_Niacin: v.vitaminB3_Niacin, vitaminB5_PantothenicAcid: v.vitaminB5_PantothenicAcid, vitaminB6: v.vitaminB6, folateDFE: v.folateDFE, folateFood: v.folateFood, folateTotal: v.folateTotal, folicAcid: v.folicAcid, vitaminB12: v.vitaminB12, vitaminC: v.vitaminC, vitaminD: v.vitaminD, vitaminE: v.vitaminE, vitaminK: v.vitaminK, choline: v.choline)
+            self.vitamins?.foodItem = self
+        }
+        
+        // Минерали
+        if let m = dto.minerals {
+            self.minerals = MineralsData(calcium: m.calcium, iron: m.iron, magnesium: m.magnesium, phosphorus: m.phosphorus, potassium: m.potassium, sodium: m.sodium, selenium: m.selenium, zinc: m.zinc, copper: m.copper, manganese: m.manganese, fluoride: m.fluoride)
+            self.minerals?.foodItem = self
+        }
+        
+        // Други съединения
+        if let o = dto.other {
+            self.other = OtherCompoundsData(alcoholEthyl: o.alcoholEthyl, caffeine: o.caffeine, theobromine: o.theobromine, cholesterol: o.cholesterol, energyKcal: o.energyKcal, water: o.water, weightG: o.weightG, ash: o.ash, betaine: o.betaine)
+            self.other?.foodItem = self
+        }
+
+        // Липиди
+        if let l = dto.lipids {
+            self.lipids = LipidsData(
+                totalSaturated: l.totalSaturated, totalMonounsaturated: l.totalMonounsaturated, totalPolyunsaturated: l.totalPolyunsaturated,
+                totalTrans: l.totalTrans, totalTransMonoenoic: l.totalTransMonoenoic, totalTransPolyenoic: l.totalTransPolyenoic,
+                sfa4_0: l.sfa4_0, sfa6_0: l.sfa6_0, sfa8_0: l.sfa8_0, sfa10_0: l.sfa10_0, sfa12_0: l.sfa12_0, sfa13_0: l.sfa13_0,
+                sfa14_0: l.sfa14_0, sfa15_0: l.sfa15_0, sfa16_0: l.sfa16_0, sfa17_0: l.sfa17_0, sfa18_0: l.sfa18_0, sfa20_0: l.sfa20_0,
+                sfa22_0: l.sfa22_0, sfa24_0: l.sfa24_0, mufa14_1: l.mufa14_1, mufa15_1: l.mufa15_1, mufa16_1: l.mufa16_1,
+                mufa17_1: l.mufa17_1, mufa18_1: l.mufa18_1, mufa20_1: l.mufa20_1, mufa22_1: l.mufa22_1, mufa24_1: l.mufa24_1,
+                tfa16_1_t: l.tfa16_1_t, tfa18_1_t: l.tfa18_1_t, tfa22_1_t: l.tfa22_1_t, tfa18_2_t: l.tfa18_2_t,
+                pufa18_2: l.pufa18_2, pufa18_3: l.pufa18_3, pufa18_4: l.pufa18_4, pufa20_2: l.pufa20_2, pufa20_3: l.pufa20_3,
+                pufa20_4: l.pufa20_4, pufa20_5: l.pufa20_5, pufa21_5: l.pufa21_5, pufa22_4: l.pufa22_4, pufa22_5: l.pufa22_5,
+                pufa22_6: l.pufa22_6, pufa2_4: l.pufa2_4
+            )
+            self.lipids?.foodItem = self
+        }
+        
+        // Аминокиселини
+        if let a = dto.aminoAcids {
+            self.aminoAcids = AminoAcidsData(
+                alanine: a.alanine, arginine: a.arginine, asparticAcid: a.asparticAcid, cystine: a.cystine,
+                glutamicAcid: a.glutamicAcid, glycine: a.glycine, histidine: a.histidine, isoleucine: a.isoleucine,
+                leucine: a.leucine, lysine: a.lysine, methionine: a.methionine, phenylalanine: a.phenylalanine,
+                proline: a.proline, threonine: a.threonine, tryptophan: a.tryptophan, tyrosine: a.tyrosine,
+                valine: a.valine, serine: a.serine, hydroxyproline: a.hydroxyproline
+            )
+            self.aminoAcids?.foodItem = self
+        }
+        
+        // Детайли за въглехидрати
+        if let c = dto.carbDetails {
+            self.carbDetails = CarbDetailsData(
+                starch: c.starch, sucrose: c.sucrose, glucose: c.glucose,
+                fructose: c.fructose, lactose: c.lactose, maltose: c.maltose, galactose: c.galactose
+            )
+            self.carbDetails?.foodItem = self
+        }
+        
+        // Стероли
+        if let s = dto.sterols {
+            self.sterols = SterolsData(
+                phytosterols: s.phytosterols, betaSitosterol: s.betaSitosterol,
+                campesterol: s.campesterol, stigmasterol: s.stigmasterol
+            )
+            self.sterols?.foodItem = self
+        }
+    }
+    
+    
+    func foodImage() -> UIImage? {
+       // A) Ако има снимка от базата — ползваме нея
+        if let data = self.photo, let img = UIImage(data: data) {
+           return img
+       }
+
+       let original = self.name
+       let folded   = original.folding(options: .diacriticInsensitive, locale: .current)
+
+       let candidates: [String] = [
+           original.assetKeyStrict(),          // напр. "Mollusks__oyster__eastern__wild__cooked__dry_heat"
+           folded.assetKeyStrict(),            // същото без диакритики
+           original.assetKeyCollapsed(),       // "Mollusks_oyster_eastern_wild_cooked_dry_heat"
+           folded.assetKeyCollapsed()
+       ]
+
+       for key in candidates {
+           if let img = UIImage(named: key) {
+               return img
+           }
+       }
+
+       return nil
+   }
+}
+
+
+extension FoodItemDetailView {
+     func formattedWeight(_ grams: Double) -> String {
+        let display = UnitConversion.formatGramsToFoodDisplay(grams)
+        return "\(display.value) \(display.unit)"
+    }
+}
+// FILE: /Users/aleksandarsvinarov/Desktop/Repo/vitahealth2/WiseEating/Food/ViewModels/FoodListVM.swift
+
+import Combine
+import Foundation
+import SwiftData
+
+@MainActor
+final class FoodListVM: ObservableObject {
+    
+    // MARK: - Inputs & Outputs
+    @Published var searchText: String = ""
+    @Published var filter: FoodItemListView.Filter = .foods
+    @Published private(set) var items: [FoodItem] = []
+    @Published private(set) var hasMore: Bool = false
+    
+    // MARK: - Private State
+    private var context: ModelContext!
+    private var container: ModelContainer?
+    private var cancellables = Set<AnyCancellable>()
+    private let pageSize = 30
+    @Published private(set) var isLoading: Bool = false
+    private var currentTask: Task<Void, Never>?
+    
+    // Two-phase search
+    private enum SearchPhase { case startsWith, contains, finished }
+    private var searchPhase: SearchPhase = .startsWith
+    private var startsWithOffset = 0
+    private var containsOffset = 0
+    
+    // MARK: - Init
+    init() {
+        Publishers.CombineLatest(
+            $searchText.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.removeDuplicates(),
+            $filter.removeDuplicates()
+        )
+        .dropFirst()
+        .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+        .sink { [weak self] _, _ in
+            self?.resetAndLoad()
+        }
+        .store(in: &cancellables) // <<< КОРЕКЦИЯТА Е ТУК
+    }
+    
+    /// Attaches the real `ModelContext` (called from the View).
+    func attach(context: ModelContext) {
+        guard self.context !== context else { return }
+        self.context = context
+        self.container = context.container
+    }
+    
+    // MARK: - Loading Logic
+    
+    func loadNextPage() {
+        // Explicitly state this is not a reset, but loading the next page.
+        loadPage(isReset: false)
+    }
+    
+    func resetAndLoad() {
+        // Cancel any ongoing task.
+        currentTask?.cancel()
+        currentTask = nil
+        
+        // Show the loading indicator, but DO NOT clear `items`.
+        isLoading = true
+        
+        // Call loadPage with a flag to indicate a fresh load.
+        loadPage(isReset: true)
+    }
+    
+    /// Fetches a page of items. Can either reset the list or append to it.
+    private func loadPage(isReset: Bool) {
+        // If already loading and it's not a reset request, do nothing.
+        if !isReset && isLoading { return }
+        
+        guard let container else {
+            // If the context is not yet available, stop the indicator.
+            if isReset { self.isLoading = false }
+            return
+        }
+        
+        isLoading = true
+        
+        let search = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let startsPredicate   = makePredicate(for: .startsWith, search: search)
+        let containsPredicate = makePredicate(for: .contains,   search: search)
+        
+        // If it's a reset, start from the beginning. Otherwise, use current values.
+        let startsOff   = isReset ? 0 : self.startsWithOffset
+        let containsOff = isReset ? 0 : self.containsOffset
+        let phase0      = isReset ? SearchPhase.startsWith : self.searchPhase
+        let pageSize    = self.pageSize
+        
+        // Cancel the previous task to avoid race conditions.
+        currentTask?.cancel()
+        currentTask = Task.detached { [weak self] in
+            guard let self else { return }
+            let bg = ModelContext(container)
+            bg.autosaveEnabled = false
+            
+            var resultsIDs: [Int] = []
+            var nextStarts   = startsOff
+            var nextContains = containsOff
+            var phase        = phase0
+            
+            if phase == .startsWith {
+                var d = FetchDescriptor<FoodItem>(
+                    predicate: startsPredicate,
+                    sortBy: [SortDescriptor(\.name)]
+                )
+                d.fetchOffset = startsOff
+                d.fetchLimit  = pageSize
+                
+                let page = (try? bg.fetch(d)) ?? []
+                resultsIDs.append(contentsOf: page.map(\.id))
+                nextStarts += page.count
+                
+                if search.isEmpty {
+                    if page.count < pageSize { phase = .finished }
+                } else {
+                    if page.count < pageSize { phase = .contains }
+                }
+            }
+            
+            if !search.isEmpty, phase == .contains, resultsIDs.count < pageSize {
+                let needed = pageSize - resultsIDs.count
+                var d = FetchDescriptor<FoodItem>(
+                    predicate: containsPredicate,
+                    sortBy: [SortDescriptor(\.name)]
+                )
+                d.fetchOffset = containsOff
+                d.fetchLimit  = needed
+                
+                let page = (try? bg.fetch(d)) ?? []
+                resultsIDs.append(contentsOf: page.map(\.id))
+                nextContains += page.count
+                
+                if page.count < needed { phase = .finished }
+            }
+            
+            // Check if the task was cancelled before updating the UI.
+            if Task.isCancelled {
+                await MainActor.run { [weak self] in self?.isLoading = false }
+                return
+            }
+            
+            await MainActor.run { [weak self] in
+                guard let self, let ctx = self.context else { return }
+                
+                var fetchedItems: [FoodItem] = []
+                if !resultsIDs.isEmpty {
+                    let idSet = Set(resultsIDs)
+                    let d = FetchDescriptor<FoodItem>(predicate: #Predicate { idSet.contains($0.id) })
+                    if let objs = try? ctx.fetch(d) {
+                        var sorted = objs
+                        sorted.sort { $0.name.localizedCompare($1.name) == .orderedAscending }
+                        fetchedItems = sorted
+                    }
+                }
+                
+                // *** THIS IS THE KEY LOGIC CHANGE ***
+                if isReset {
+                    // For a reset, replace the entire array.
+                    self.items = fetchedItems
+                } else {
+                    // For a next page, append to the existing array.
+                    self.items.append(contentsOf: fetchedItems)
+                }
+                
+                self.startsWithOffset = nextStarts
+                self.containsOffset   = nextContains
+                self.searchPhase      = phase
+                self.hasMore          = (self.searchPhase != .finished)
+                self.isLoading        = false
+            }
+        }
+    }
+    
+    // MARK: - Predicate Builder (CORRECTED to include .plans)
+    private func makePredicate(for phase: SearchPhase, search: String) -> Predicate<FoodItem> {
+        let normalizedSearch = search.lowercased()
+        
+        if search.isEmpty {
+            switch filter {
+            case .foods:     return #Predicate<FoodItem> { $0.isUserAdded && !$0.isRecipe && !$0.isMenu }
+            case .recipes:   return #Predicate<FoodItem> { $0.isUserAdded && $0.isRecipe }
+            case .menus:     return #Predicate<FoodItem> { $0.isUserAdded && $0.isMenu }
+            case .favorites: return #Predicate<FoodItem> { $0.isFavorite }
+            case .default:   return #Predicate<FoodItem> { !$0.isUserAdded }
+            case .diets:     return #Predicate<FoodItem> { _ in false }
+            case .plans:     return #Predicate<FoodItem> { _ in false } // Added this case
+            }
+        }
+        
+        switch filter {
+        case .foods:
+            if phase == .startsWith {
+                return #Predicate<FoodItem> { item in
+                    item.nameNormalized.starts(with: normalizedSearch) &&
+                    item.isUserAdded && !item.isRecipe && !item.isMenu
+                }
+            } else {
+                return #Predicate<FoodItem> { item in
+                    item.name.localizedStandardContains(search) &&
+                    !item.nameNormalized.starts(with: normalizedSearch) &&
+                    item.isUserAdded && !item.isRecipe && !item.isMenu
+                }
+            }
+            
+        case .recipes:
+            if phase == .startsWith {
+                return #Predicate<FoodItem> { item in
+                    item.nameNormalized.starts(with: normalizedSearch) &&
+                    item.isUserAdded && item.isRecipe
+                }
+            } else {
+                return #Predicate<FoodItem> { item in
+                    item.name.localizedStandardContains(search) &&
+                    !item.nameNormalized.starts(with: normalizedSearch) &&
+                    item.isUserAdded && item.isRecipe
+                }
+            }
+            
+        case .menus:
+            if phase == .startsWith {
+                return #Predicate<FoodItem> { item in
+                    item.nameNormalized.starts(with: normalizedSearch) &&
+                    item.isUserAdded && item.isMenu
+                }
+            } else {
+                return #Predicate<FoodItem> { item in
+                    item.name.localizedStandardContains(search) &&
+                    !item.nameNormalized.starts(with: normalizedSearch) &&
+                    item.isUserAdded && item.isMenu
+                }
+            }
+            
+        case .favorites:
+            if phase == .startsWith {
+                return #Predicate<FoodItem> { item in
+                    item.nameNormalized.starts(with: normalizedSearch) && item.isFavorite
+                }
+            } else {
+                return #Predicate<FoodItem> { item in
+                    item.name.localizedStandardContains(search) &&
+                    !item.nameNormalized.starts(with: normalizedSearch) &&
+                    item.isFavorite
+                }
+            }
+            
+        case .default:
+            if phase == .startsWith {
+                return #Predicate<FoodItem> { item in
+                    item.nameNormalized.starts(with: normalizedSearch) && !item.isUserAdded
+                }
+            } else {
+                return #Predicate<FoodItem> { item in
+                    item.name.localizedStandardContains(search) &&
+                    !item.nameNormalized.starts(with: normalizedSearch) &&
+                    !item.isUserAdded
+                }
+            }
+            
+        case .diets:
+            return #Predicate<FoodItem> { _ in false }
+            
+        case .plans: // Added this case
+            return #Predicate<FoodItem> { _ in false }
+        }
+    }
+    
+    // MARK: - Delete Helpers
+    
+    /// Колко пъти дадена храна се използва в рецепти (като IngredientLink.food)
+    /// Колко пъти дадена храна се използва в рецепти (като IngredientLink.food)
+    func ingredientUsageCount(for item: FoodItem) -> Int {
+        guard let ctx = context else { return 0 }
+        
+        let targetID = item.id   // <-- изваждаме Int стойността
+        
+        let descriptor = FetchDescriptor<IngredientLink>(
+            predicate: #Predicate<IngredientLink> { link in
+                link.food?.id == targetID
+            }
+        )
+        
+        do {
+            let links = try ctx.fetch(descriptor)
+            return links.count
+        } catch {
+            print("❌ Failed to fetch ingredient usage count: \(error)")
+            return 0
+        }
+    }
+    
+    // MARK: - Delete Helpers
+
+    /// Колко пъти дадена храна се използва:
+    ///  - в рецепти/менюта (IngredientLink.food)
+    ///  - в meal планове (MealPlanEntry.food)
+    func foodUsageCount(_ item: FoodItem) -> Int {
+        guard let ctx = context else { return 0 }
+        let targetID = item.id
+        
+        do {
+            // 1) Участие като съставка в рецепти/менюта
+            let ingredientDesc = FetchDescriptor<IngredientLink>(
+                predicate: #Predicate<IngredientLink> { link in
+                    link.food?.id == targetID
+                }
+            )
+            let ingredientCount = try ctx.fetch(ingredientDesc).count
+            
+            // 2) Участие в meal планове
+            let mealEntryDesc = FetchDescriptor<MealPlanEntry>(
+                predicate: #Predicate<MealPlanEntry> { entry in
+                    entry.food?.id == targetID
+                }
+            )
+            let mealEntryCount = try ctx.fetch(mealEntryDesc).count
+            
+            return ingredientCount + mealEntryCount
+        } catch {
+            print("❌ Failed to fetch food usage count: \(error)")
+            return 0
+        }
+    }
+
+    /// Изтрива храната, като преди това я маха от:
+    ///  - всички рецепти/менюта (IngredientLink)
+    ///  - всички meal планове (MealPlanEntry)
+    func deleteDetachingFromRecipesAndMealPlans(_ item: FoodItem) {
+        guard let ctx = context else { return }
+        let targetID = item.id
+        
+        do {
+            // 1) IngredientLink – където храната е съставка
+            let ingredientDesc = FetchDescriptor<IngredientLink>(
+                predicate: #Predicate<IngredientLink> { link in
+                    link.food?.id == targetID
+                }
+            )
+            let ingredientLinks = try ctx.fetch(ingredientDesc)
+            if !ingredientLinks.isEmpty {
+                print("🧹 Removing \(ingredientLinks.count) ingredient links for food '\(item.name)'")
+                ingredientLinks.forEach { ctx.delete($0) }
+            }
+            
+            // 2) MealPlanEntry – където храната е в meal план
+            let mealEntryDesc = FetchDescriptor<MealPlanEntry>(
+                predicate: #Predicate<MealPlanEntry> { entry in
+                    entry.food?.id == targetID
+                }
+            )
+            let mealEntries = try ctx.fetch(mealEntryDesc)
+            if !mealEntries.isEmpty {
+                print("🧹 Removing \(mealEntries.count) meal plan entries for food '\(item.name)'")
+                mealEntries.forEach { ctx.delete($0) }
+            }
+        } catch {
+            print("❌ Failed to detach food from recipes/meal plans before delete: \(error)")
+        }
+        
+        // Накрая – стандартното ти delete, което вече се грижи за isMenu / linkedMenuID
+        delete(item)
+    }
+
+    
+    
+    func delete(_ item: FoodItem) {
+        guard item.isUserAdded, let ctx = context else { return }
+        
+        // --- START OF MODIFICATION ---
+        // Ако трием меню, чистим и MealPlanMeal както беше при теб
+        if item.isMenu {
+            print("🗑️ Deleting a menu item: \(item.name). Checking for linked meal plans...")
+            
+            let menuIDToDelete = item.id
+            let descriptor = FetchDescriptor<MealPlanMeal>(
+                predicate: #Predicate { $0.linkedMenuID == menuIDToDelete }
+            )
+            
+            do {
+                let linkedMeals = try ctx.fetch(descriptor)
+                
+                if !linkedMeals.isEmpty {
+                    print("   - Found \(linkedMeals.count) meal plan slots linked to this menu. Clearing them.")
+                    for meal in linkedMeals {
+                        for entry in meal.entries {
+                            ctx.delete(entry)
+                        }
+                        meal.entries.removeAll()
+                        meal.linkedMenuID = nil
+                    }
+                } else {
+                    print("   - No meal plan slots are linked to this menu.")
+                }
+            } catch {
+                print("   - ❌ Failed to fetch linked meal plan meals: \(error)")
+            }
+        }
+        // --- END OF MODIFICATION ---
+        
+        ctx.delete(item)
+        if let index = items.firstIndex(of: item) {
+            items.remove(at: index)
+        }
+        try? ctx.save()
+    }
+    
+    func deleteAllVisible() {
+        guard let ctx = context else { return }
+        let itemsToDelete = items.filter(\.isUserAdded)
+        itemsToDelete.forEach(ctx.delete)
+        try? ctx.save()
+        resetAndLoad()
+    }
+    
+    func pruneFavoritesAfterToggle() {
+        guard filter == .favorites else { return }
+        items.removeAll { !$0.isFavorite }
+    }
+    
+    
+    // MARK: - Pantry / History cleanup for a FoodItem
+
+    private func cleanupPantryHistory(for item: FoodItem) {
+        guard let ctx = context else { return }
+        
+        let targetPID = item.persistentModelID
+        
+        do {
+            // 1) Всички MealLogStorageLink за тази храна (независимо от профила)
+            let linksDesc = FetchDescriptor<MealLogStorageLink>(
+                predicate: #Predicate<MealLogStorageLink> {
+                    $0.food?.persistentModelID == targetPID
+                }
+            )
+            let links = try ctx.fetch(linksDesc)
+            links.forEach { ctx.delete($0) }
+            
+            // 2) Всички StorageTransaction за тази храна (за всички профили)
+            let transactionsDesc = FetchDescriptor<StorageTransaction>(
+                predicate: #Predicate<StorageTransaction> {
+                    $0.food?.persistentModelID == targetPID
+                }
+            )
+            let transactions = try ctx.fetch(transactionsDesc)
+            transactions.forEach { ctx.delete($0) }
+            
+            print("🧹 Removed \(links.count) MealLogStorageLink and \(transactions.count) StorageTransaction for food '\(item.name)'")
+            
+            // 3) StorageItem-ите ще паднат каскадно, ако имаш в FoodItem нещо като:
+            // @Relationship(deleteRule: .cascade, inverse: \StorageItem.food)
+            // var stockEntries: [StorageItem]? = []
+            // иначе можеш тук да добавиш и ръчно чистене на StorageItem по item.id
+
+        } catch {
+            print("❌ Failed to cleanup pantry history for food '\(item.name)': \(error)")
+        }
+    }
+
+    
+}
+import SwiftUI
+import SwiftData
+
+struct FoodItemListView: View {
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @ObservedObject private var effectManager = EffectManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+    @FocusState.Binding var isSearchFieldFocused: Bool
+    
+    @State private var isShowingDeletePlanConfirmation = false
+    @State private var planToDelete: MealPlan? = nil
+    
+    @Environment(\.safeAreaInsets) private var safeAreaInsets
+    private var headerTopPadding: CGFloat {
+        return -safeAreaInsets.top + 10
+    }
+    
+    // MARK: - Filter Enum (with "Plans")
+    enum Filter: String, CaseIterable, Identifiable {
+        case foods     = "Foods"
+        case recipes   = "Recipes"
+        case menus     = "Menus"
+        case plans     = "Meal Plans"
+        case favorites = "Favorites"
+        case diets     = "Diets"
+        case `default` = "Default"
+        var id: String { rawValue }
+    }
+    
+    // MARK: - Navigation State
+    enum PresentedItem: Identifiable, Equatable {
+        case newFood, newRecipe, newMenu, newDiet, newPlan
+        case editFood(FoodItem), editRecipe(FoodItem), editMenu(FoodItem), editDiet(Diet), editPlan(MealPlan)
+        case duplicateFood(FoodItemCopy), duplicateRecipe(FoodItemCopy), duplicateMenu(FoodItemCopy)
+        case detail(FoodItem), detailDiet(Diet), detailPlan(MealPlan)
+        
+        var id: String {
+            switch self {
+            case .newFood: "newFood"
+            case .newRecipe: "newRecipe"
+            case .newMenu: "newMenu"
+            case .newDiet: "newDiet"
+            case .newPlan: "newPlan"
+            case .editFood(let item): "editFood-\(item.id)"
+            case .editRecipe(let item): "editRecipe-\(item.id)"
+            case .editMenu(let item): "editMenu-\(item.id)"
+            case .editDiet(let item): "editDiet-\(item.id)"
+            case .editPlan(let item): "editPlan-\(item.id)"
+            case .duplicateFood(let item): "duplicateFood-\(item.id)"
+            case .duplicateRecipe(let item): "duplicateRecipe-\(item.id)"
+            case .duplicateMenu(let item): "duplicateMenu-\(item.id)"
+            case .detail(let item): "detail-\(item.id)"
+            case .detailDiet(let item): "detailDiet-\(item.id)"
+            case .detailPlan(let item): "detailPlan-\(item.id)"
+            }
+        }
+        
+        static func == (lhs: PresentedItem, rhs: PresentedItem) -> Bool {
+            lhs.id == rhs.id
+        }
+    }
+    
+    @State private var presentedItem: PresentedItem? = nil
+    @State private var isAddButtonVisible = true
+    let profile: Profile?
+    
+    // MARK: - Search and Navigation Bindings
+    @Binding var globalSearchText: String
+    @Binding var isSearching: Bool
+    @Binding var navBarIsHiden: Bool
+    @Binding var isProfilesDrawerVisible: Bool
+    @State private var SIsSearching = false
+    @State private var SglobalSearchText = ""
+    let onActivateSearch: () -> Void
+    let onDismissSearch: () -> Void
+    
+    // MARK: - ViewModels and Data
+    @Environment(\.modelContext) private var modelContext
+    // --- START OF CHANGE ---
+    @ObservedObject var vm: FoodListVM // Now passed from RootView
+    // --- END OF CHANGE ---
+    @StateObject var mealPlanVM: MealPlanListVM
+    
+    @Query(sort: \Diet.name) private var allDiets: [Diet]
+    @State private var filteredDiets: [Diet] = []
+    @State private var isShowingDeleteDietAlert = false
+    @State private var dietToDelete: Diet?
+    
+    // MARK: - UI State
+    @State private var buttonOffset: CGSize = .zero
+    @State private var isDragging: Bool = false
+    @GestureState private var gestureDragOffset: CGSize = .zero
+    @State private var isPressed: Bool = false
+    private let buttonPositionKey = "foodItemFloatingButtonPosition"
+    
+    @State private var isShowingDeleteAllConfirmation = false
+    @State private var isShowingDeleteItemConfirmation = false
+    @State private var itemToDelete: FoodItem? = nil
+    @State private var itemUsageCount: Int = 0
+    
+    @State private var editingDietProfilesFor: Diet? = nil
+    @Query(sort: \Profile.name) private var profiles: [Profile]
+    @State private var stagingProfileIDs: Set<UUID> = []
+    
+    @State private var currentTimeString: String = ""
+    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    private static let tFmt = DateFormatter.shortTime
+    
+    // +++ НОВО: Състояние за непрочетени известия +++
+    @State private var hasUnreadNotifications: Bool = false
+    
+    // MARK: - Initializer
+    init(
+        vm: FoodListVM, // <-- Added
+        profile: Profile?,
+        globalSearchText: Binding<String>,
+        isSearching: Binding<Bool>,
+        navBarIsHiden: Binding<Bool>,
+        isProfilesDrawerVisible: Binding<Bool>,
+        onActivateSearch: @escaping () -> Void,
+        onDismissSearch: @escaping () -> Void,
+        isSearchFieldFocused: FocusState<Bool>.Binding
+    ) {
+        self.vm = vm // <-- Added
+        self.profile = profile
+        self._globalSearchText = globalSearchText
+        self._isSearching = isSearching
+        self._navBarIsHiden = navBarIsHiden
+        self._isProfilesDrawerVisible = isProfilesDrawerVisible
+        self.onActivateSearch = onActivateSearch
+        self.onDismissSearch = onDismissSearch
+        self._isSearchFieldFocused = isSearchFieldFocused
+        _mealPlanVM = StateObject(wrappedValue: MealPlanListVM(profile: profile))
+    }
+    
+    // MARK: - Body
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .bottomTrailing) {
+                ZStack {
+                    mainContent
+                        .opacity(presentedItem == nil ? 1 : 0)
+                        .allowsHitTesting(presentedItem == nil)
+                        .zIndex(0)
+                    
+                    if let item = presentedItem {
+                        presentedItemView(for: item)
+                            .transition(.move(edge: .trailing))
+                            .zIndex(10)
+                    }
+                }
+                
+                if !isSearching && (vm.filter != .default && vm.filter != .favorites) && isAddButtonVisible && !navBarIsHiden {
+                    addButton(geometry: geometry)
+                }
+            }
+            .overlay {
+                if editingDietProfilesFor != nil {
+                    profileSelectionSheet
+                }
+            }
+            .onReceive(timer) { _ in
+                self.currentTimeString = Self.tFmt.string(from: Date())
+            }
+            .task { await checkForUnreadNotifications() }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                Task { await checkForUnreadNotifications() }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .unreadNotificationStatusChanged)) { _ in
+                Task { await checkForUnreadNotifications() }
+            }
+        }
+    }
+    
+    
+    // +++ НОВА ПОМОЩНА ФУНКЦИЯ +++
+    private func checkForUnreadNotifications() async {
+        let unread = await NotificationManager.shared.getUnreadNotifications()
+        self.hasUnreadNotifications = !unread.isEmpty
+    }
+    
+    private var mainContent: some View {
+        ZStack {
+            VStack(spacing: 0) {
+                if let profile = profile {
+                    userToolbar(for: profile)
+                        .padding(.trailing, 50)
+                        .padding(.leading, 40)
+                        .padding(.horizontal, -20)
+                        .padding(.bottom, 8)
+                }
+                
+                customToolbar
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                
+                let layoutMode: WrappingSegmentedControl<Filter>.LayoutMode =
+                (horizontalSizeClass == .regular) ? .wrap : .scrollable
+                
+                WrappingSegmentedControl(selection: $vm.filter, layoutMode: layoutMode)
+                    .padding(.bottom, 5)
+                
+                if vm.filter == .diets {
+                    dietsManagementSection
+                } else if vm.filter == .plans {
+                    mealPlansSection
+                } else if vm.items.isEmpty && !vm.isLoading {
+                    Spacer()
+                    ContentUnavailableView {
+                        Label(emptyStateTitle, systemImage: "doc.text.magnifyingglass")
+                            .foregroundColor(effectManager.currentGlobalAccentColor)
+                    } description: {
+                        emptyStateDescription
+                            .foregroundColor(effectManager.currentGlobalAccentColor)
+                    }
+                    Spacer()
+                } else {
+                    foodItemsList
+                }
+            }
+            .padding(.top, headerTopPadding)
+            
+            if vm.isLoading && vm.items.isEmpty {
+                Color.black.opacity(0.05)
+                    .ignoresSafeArea()
+                
+                ProgressView()
+                    .scaleEffect(1.2)
+                    .progressViewStyle(CircularProgressViewStyle(tint: effectManager.currentGlobalAccentColor))
+                    .padding()
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                    .shadow(radius: 6)
+                    .transition(.opacity)
+            }
+        }
+        .alert("Delete Item", isPresented: $isShowingDeleteItemConfirmation) {
+            Button("Delete", role: .destructive) {
+                if let item = itemToDelete {
+                    withAnimation {
+                        if itemUsageCount > 0 {
+                            // If the food is used in recipes – detach it first
+                            vm.deleteDetachingFromRecipesAndMealPlans(item)
+                        } else {
+                            // Normal delete
+                            vm.delete(item)
+                        }
+                    }
+                }
+                itemToDelete = nil
+                itemUsageCount = 0
+            }
+            Button("Cancel", role: .cancel) {
+                itemToDelete = nil
+                itemUsageCount = 0
+            }
+        } message: {
+            if let item = itemToDelete {
+                if itemUsageCount > 0 {
+                    Text("""
+                This food item is used in \(itemUsageCount) recipes or menu or meal plans.
+                If you delete it, it will be removed from those places.
+
+                Are you sure you want to continue?
+                """)
+                } else {
+                    Text("Are you sure you want to delete '\(item.name)'? This action cannot be undone.")
+                }
+            } else {
+                Text("")
+            }
+        }
+        .alert("Delete Diet", isPresented: $isShowingDeleteDietAlert) {
+            Button("Delete", role: .destructive) {
+                if let diet = dietToDelete {
+                    deleteDiet(diet)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to delete the \"\(dietToDelete?.name ?? "")\" diet? This cannot be undone.")
+        }
+        .alert("Delete Meal Plan", isPresented: $isShowingDeletePlanConfirmation) {
+            Button("Delete Plan Only", role: .destructive) {
+                if let plan = planToDelete {
+                    mealPlanVM.delete(plan: plan, alsoDeleteMenus: false)
+                }
+                planToDelete = nil
+            }
+            
+            Button("Delete Plan & Menus", role: .destructive) {
+                if let plan = planToDelete {
+                    mealPlanVM.delete(plan: plan, alsoDeleteMenus: true)
+                }
+                planToDelete = nil
+            }
+            
+            Button("Cancel", role: .cancel) {
+                planToDelete = nil
+            }
+        } message: {
+            if let plan = planToDelete {
+                // Ако имаш meals + linkedMenuID:
+                let linkedMenuCount = plan.days
+                    .flatMap { $0.meals }
+                    .compactMap { $0.linkedMenuID }
+                    .count
+                
+                if linkedMenuCount > 0 {
+                    Text("""
+        This meal plan has \(linkedMenuCount) linked menu(s).
+
+        • "Delete Plan Only" will remove the plan but keep the menus wherever they are used.
+        • "Delete Plan & Menus" will delete the plan and those linked menus as well.
+
+        What would you like to do?
+        """)
+                } else {
+                    Text("Are you sure you want to delete the meal plan '\(plan.name)'? This action cannot be undone.")
+                }
+            } else {
+                Text("Are you sure you want to delete this meal plan?")
+            }
+        }
+
+        .onAppear {
+            vm.attach(context: modelContext)
+            mealPlanVM.attach(context: modelContext)
+            vm.searchText = globalSearchText
+            vm.resetAndLoad()
+            
+            updateFilteredDiets()
+            loadButtonPosition()
+        }
+        .onChange(of: globalSearchText) { _, newValue in
+            vm.searchText = newValue
+            if vm.filter == .diets {
+                updateFilteredDiets()
+            } else if vm.filter == .plans {
+                mealPlanVM.searchText = newValue
+            }
+        }
+        .onChange(of: vm.filter) { _, newFilter in
+            if newFilter == .diets {
+                updateFilteredDiets()
+            } else if newFilter == .plans {
+                mealPlanVM.fetchPlans()
+            }
+        }
+        .onChange(of: allDiets) {
+            updateFilteredDiets()
+        }
+        .onChange(of: modelContext) { _, new in
+            vm.attach(context: new)
+            mealPlanVM.attach(context: new)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .foodFavoriteToggled)) { _ in
+            vm.pruneFavoritesAfterToggle()
+        }
+        .onChange(of: editingDietProfilesFor) { _, newDiet in
+            guard let diet = newDiet else { return }
+            let profilesWithDiet = profiles.filter { $0.diets.contains(where: { $0.id == diet.id }) }
+            stagingProfileIDs = Set(profilesWithDiet.map { $0.id })
+        }
+    }
+    
+    @ViewBuilder
+    private func userToolbar(for profile: Profile) -> some View {
+        HStack {
+            Text(currentTimeString)
+                .font(.system(size: 16))
+                .fontWeight(.medium)
+                .foregroundColor(effectManager.currentGlobalAccentColor)
+                .onAppear {
+                    self.currentTimeString = Self.tFmt.string(from: Date())
+                }
+            
+            Spacer()
+            
+            Button(action: {
+                NotificationCenter.default.post(name: Notification.Name("openProfilesDrawer"), object: nil)
+            }) {
+                // +++ НАЧАЛО НА ПРОМЯНАТА: Обвиваме в ZStack +++
+                ZStack(alignment: .topTrailing) {
+                    if let photoData = profile.photoData, let uiImage = UIImage(data: photoData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 40, height: 40)
+                            .clipShape(Circle())
+                    } else {
+                        ZStack {
+                            Circle()
+                                .fill(effectManager.currentGlobalAccentColor.opacity(0.2))
+                            if let firstLetter = profile.name.first {
+                                Text(String(firstLetter))
+                                    .font(.headline)
+                                    .foregroundColor(effectManager.currentGlobalAccentColor)
+                            }
+                        }
+                        .frame(width: 40, height: 40)
+                    }
+                    
+                    // +++ НОВО: Условна оранжева точка +++
+                    if hasUnreadNotifications {
+                        Circle()
+                            .fill(Color.orange)
+                            .frame(width: 12, height: 12)
+                            .offset(x: 1, y: -1)
+                    }
+                }
+                // +++ КРАЙ НА ПРОМЯНАТА +++
+            }
+            .buttonStyle(.plain)
+            .foregroundColor(effectManager.currentGlobalAccentColor)
+        }
+    }
+    
+    private var customToolbar: some View {
+        HStack {
+            Group {
+                if vm.filter == .default { Text("Default list").font(.title.bold()) }
+                else if vm.filter == .foods { Text("Food list").font(.title.bold()) }
+                else if vm.filter == .recipes { Text("Recipes list").font(.title.bold()) }
+                else if vm.filter == .menus { Text("Menus list").font(.title.bold()) }
+                else if vm.filter == .plans { Text("Meal Plans").font(.title.bold()) }
+                else if vm.filter == .favorites { Text("Favorites").font(.title.bold()) }
+                else if vm.filter == .diets { Text("Manage Diets").font(.title.bold()) }
+            }
+            .foregroundColor(effectManager.currentGlobalAccentColor)
+            
+            Spacer()
+        }
+    }
+    
+    @ViewBuilder
+    private func presentedItemView(for item: PresentedItem) -> some View {
+        
+        let onDismissItemFootView: (FoodItem?) -> Void = { _ in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                self.presentedItem = nil
+                self.isAddButtonVisible = true
+                self.navBarIsHiden = false
+                if SIsSearching{
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        onActivateSearch()
+                        globalSearchText = SglobalSearchText
+                        SIsSearching = false
+                    }
+                }
+            }
+            vm.resetAndLoad()
+        }
+        
+        let onDismissItemView: () -> Void = {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                self.presentedItem = nil
+                self.isAddButtonVisible = true
+                self.navBarIsHiden = false
+                if SIsSearching{
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        onActivateSearch()
+                        globalSearchText = SglobalSearchText
+                        SIsSearching = false
+                    }
+                }
+            }
+        }
+        
+        let onDismissDietItemView: (Diet?) -> Void = {_ in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                self.presentedItem = nil
+                self.isAddButtonVisible = true
+                self.navBarIsHiden = false
+                if SIsSearching{
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        onActivateSearch()
+                        globalSearchText = SglobalSearchText
+                        SIsSearching = false
+                    }
+                }
+            }
+        }
+        
+        let onPlanEditorDismiss = {
+            onDismissSearch()
+            withAnimation(.easeInOut(duration: 0.3)) {
+                self.presentedItem = nil
+                self.isAddButtonVisible = true
+                self.navBarIsHiden = false
+                if SIsSearching{
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        onActivateSearch()
+                        globalSearchText = SglobalSearchText
+                        SIsSearching = false
+                    }
+                }
+            }
+            mealPlanVM.fetchPlans()
+        }
+        
+        switch item {
+        case .newFood:
+            FoodItemEditorView(profile: profile, onDismiss: onDismissItemFootView)
+        case .editFood(let food):
+            FoodItemEditorView(food: food, profile: profile, onDismiss: onDismissItemFootView)
+        case .duplicateFood(let foodCopy):
+            FoodItemEditorView(dubFood: foodCopy, profile: profile, onDismiss: onDismissItemFootView)
+            
+        case .newRecipe:
+            FoodItemReceptEditorView(profile: profile, globalSearchText: $globalSearchText, onDismiss: onDismissItemFootView, isSearchFieldFocused: $isSearchFieldFocused)
+        case .editRecipe(let recipe):
+            FoodItemReceptEditorView(food: recipe, profile: profile, globalSearchText: $globalSearchText, onDismiss: onDismissItemFootView, isSearchFieldFocused: $isSearchFieldFocused)
+        case .duplicateRecipe(let recipeCopy):
+            FoodItemReceptEditorView(dubFood: recipeCopy, profile: profile, globalSearchText: $globalSearchText, onDismiss: onDismissItemFootView, isSearchFieldFocused: $isSearchFieldFocused)
+            
+        case .newMenu:
+            FoodItemMenuEditorView(profile: profile, globalSearchText: $globalSearchText, onDismiss: onDismissItemFootView, isSearchFieldFocused: $isSearchFieldFocused)
+        case .editMenu(let menu):
+            FoodItemMenuEditorView(food: menu, profile: profile, globalSearchText: $globalSearchText, onDismiss: onDismissItemFootView, isSearchFieldFocused: $isSearchFieldFocused)
+        case .duplicateMenu(let menuCopy):
+            FoodItemMenuEditorView(dubFood: menuCopy, profile: profile, globalSearchText: $globalSearchText, onDismiss: onDismissItemFootView, isSearchFieldFocused: $isSearchFieldFocused)
+            
+        case .detail(let food):
+            FoodItemDetailView(food: food, profile: profile, onDismiss: onDismissItemView)
+            
+        case .newDiet:
+            AddEditDietView(
+                dietToEdit: nil,
+                profile: profile,
+                onDismiss: onDismissDietItemView,
+                globalSearchText: $globalSearchText,
+                isSearchFieldFocused: $isSearchFieldFocused,
+                onDismissSearch: onDismissSearch
+            )
+        case .editDiet(let diet):
+            AddEditDietView(
+                dietToEdit: diet,
+                profile: profile,
+                onDismiss: onDismissDietItemView,
+                globalSearchText: $globalSearchText,
+                isSearchFieldFocused: $isSearchFieldFocused,
+                onDismissSearch: onDismissSearch
+            )
+            
+        case .detailDiet(let diet):
+            DietDetailView(
+                diet: diet,
+                profile: self.profile,
+                onDismiss: onDismissItemView,
+                globalSearchText: $globalSearchText,
+                onDismissSearch: onDismissSearch
+            )
+            
+        case .newPlan:
+            MealPlanEditorView(
+                profile: profile!,
+                navBarIsHiden: $navBarIsHiden,
+                globalSearchText: $globalSearchText,
+                isSearchFieldFocused: self.$isSearchFieldFocused,
+                onDismiss: onPlanEditorDismiss
+            )
+        case .editPlan(let plan):
+            MealPlanEditorView(
+                profile: profile!,
+                planToEdit: plan,
+                navBarIsHiden: $navBarIsHiden,
+                globalSearchText: $globalSearchText,
+                isSearchFieldFocused: self.$isSearchFieldFocused,
+                onDismiss: onPlanEditorDismiss
+            )
+        case .detailPlan(let plan):
+            MealPlanDetailView(plan: plan, profile: self.profile!, onDismiss: onPlanEditorDismiss, navBarIsHiden: $navBarIsHiden)
+        }
+    }
+    
+    private var emptyStateTitle: String {
+        if !vm.searchText.isEmpty { return "No Results for \"\(vm.searchText)\"" }
+        switch vm.filter {
+        case .foods: return "No Foods"
+        case .recipes: return "No Recipes"
+        case .menus: return "No Menus"
+        case .plans: return "No Meal Plans"
+        case .favorites: return "No Favorites"
+        case .default: return "No Items Available"
+        case .diets: return ""
+        }
+    }
+    
+    private var emptyStateDescription: Text {
+        let text: String
+        if !vm.searchText.isEmpty { text = "Try a different search term or change the filter." }
+        else {
+            switch vm.filter {
+            case .foods: text = "Tap the '+' button to add your first food."
+            case .recipes: text = "Tap the '+' button to add your first recipe."
+            case .menus: text = "Tap the '+' button to add your first menu."
+            case .plans: text = "Tap the '+' button to create your first meal plan."
+            case .favorites: text = "You can add items to your favorites by swiping left on them."
+            case .default: text = "Select a filter like 'Foods' or 'Recipes' to get started."
+            case .diets: text = ""
+            }
+        }
+        return Text(text)
+    }
+    
+    private var foodItemsList: some View {
+        List {
+            ForEach(vm.items.filter { vm.filter != .favorites || $0.isFavorite }) { item in
+                FoodRow(
+                    item: item,
+                    textColor: effectManager.currentGlobalAccentColor,
+                    onItemTapped: {
+                        present(item: .detail(item))
+                    }
+                )
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    swipeActions(for: item)
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+            }
+            
+            if vm.hasMore {
+                ProgressView()
+                    .onAppear { vm.loadNextPage() }
+                    .padding(.vertical, 12)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .progressViewStyle(CircularProgressViewStyle(tint: effectManager.currentGlobalAccentColor))
+            }
+            
+            Color.clear.frame(height: 150)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .mask(
+            LinearGradient(
+                gradient: Gradient(stops: [
+                    .init(color: .clear, location: 0),
+                    .init(color: effectManager.currentGlobalAccentColor, location: 0.01),
+                    .init(color: effectManager.currentGlobalAccentColor, location: 0.9),
+                    .init(color: .clear, location: 0.95)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .ignoresSafeArea(.all)
+    }
+    
+    private var dietsManagementSection: some View {
+        Group {
+            if filteredDiets.isEmpty && !globalSearchText.isEmpty {
+                ContentUnavailableView.search(text: globalSearchText)
+            } else {
+                List {
+                    ForEach(filteredDiets) { diet in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(diet.name)
+                                    .foregroundColor(effectManager.currentGlobalAccentColor)
+                                if diet.isDefault {
+                                    Text("Default")
+                                        .font(.caption2)
+                                        .foregroundStyle(effectManager.currentGlobalAccentColor.opacity(0.7))
+                                }
+                            }
+                            Spacer()
+                            profileIconsPreview(for: diet)
+                            Button(action: {
+                                if isSearching {
+                                    onDismissSearch()
+                                }
+                                withAnimation {
+                                    editingDietProfilesFor = diet
+                                    navBarIsHiden = true
+                                    isProfilesDrawerVisible = false
+                                }
+                            }) {
+                                Image(systemName: "person.2.fill")
+                                    .font(.title3)
+                                    .foregroundColor(effectManager.currentGlobalAccentColor)
+                                    .padding(10)
+                                    .glassCardStyle(cornerRadius: 20)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            present(item: .detailDiet(diet))
+                        }
+                        .padding()
+                        .glassCardStyle(cornerRadius: 20)
+                        .swipeActions(allowsFullSwipe: false) {
+                            if !diet.isDefault {
+                                Button(role: .destructive) {
+                                    if #available(iOS 26.0, *) {
+                                        deleteDiet(diet)
+                                    } else {
+                                        dietToDelete = diet
+                                        isShowingDeleteDietAlert = true
+                                    }
+                                } label: {
+                                    Image(systemName: "trash.fill")
+                                        .symbolRenderingMode(.palette)
+                                        .foregroundStyle(effectManager.currentGlobalAccentColor)
+                                }
+                                .tint(.clear)
+                            }
+                            Button {
+                                present(item: .editDiet(diet))
+                            } label: {
+                                Image(systemName: "pencil")
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(effectManager.currentGlobalAccentColor)
+                            }
+                            .tint(.clear)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                    }
+                    
+                    Color.clear.frame(height: 150)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .mask(
+                    LinearGradient(
+                        gradient: Gradient(stops: [
+                            .init(color: .clear, location: 0),
+                            .init(color: effectManager.currentGlobalAccentColor, location: 0.01),
+                            .init(color: effectManager.currentGlobalAccentColor, location: 0.9),
+                            .init(color: .clear, location: 0.95)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var mealPlansSection: some View {
+        if mealPlanVM.plans.isEmpty && globalSearchText.isEmpty {
+            ContentUnavailableView("No Meal Plans", systemImage: "calendar.badge.plus", description: Text("Create your first meal plan by tapping the '+' button below."))
+                .foregroundStyle(effectManager.currentGlobalAccentColor)
+        } else if mealPlanVM.plans.isEmpty {
+            ContentUnavailableView.search(text: globalSearchText)
+        } else {
+            List {
+                ForEach(mealPlanVM.plans) { plan in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(plan.name)
+                            .font(.headline)
+                            .foregroundColor(effectManager.currentGlobalAccentColor)
+                        
+                        HStack {
+                            Text("\(plan.days.count) day\(plan.days.count == 1 ? "" : "s")")
+                            Text("•")
+                            Text("Created: \(plan.creationDate.formatted(date: .abbreviated, time: .omitted))")
+                        }
+                        .font(.caption)
+                        .foregroundColor(effectManager.currentGlobalAccentColor.opacity(0.8))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .glassCardStyle(cornerRadius: 20)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        present(item: .detailPlan(plan))
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                    .swipeActions {
+                        Button(role: .destructive) {
+                            self.planToDelete = plan
+                            self.isShowingDeletePlanConfirmation = true
+                        } label: {
+                            Image(systemName: "trash.fill")
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(effectManager.currentGlobalAccentColor)
+                        }
+                        .tint(.clear)
+                        
+                        Button {
+                            present(item: .editPlan(plan))
+                        } label: {
+                            Image(systemName: "pencil")
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(effectManager.currentGlobalAccentColor)
+                        }
+                        .tint(.clear)
+                    }
+                }
+                Color.clear.frame(height: 150)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .mask(
+                LinearGradient(
+                    gradient: Gradient(stops: [
+                        .init(color: .clear, location: 0),
+                        .init(color: effectManager.currentGlobalAccentColor, location: 0.01),
+                        .init(color: effectManager.currentGlobalAccentColor, location: 0.9),
+                        .init(color: .clear, location: 0.95)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+        }
+    }
+    
+    @ViewBuilder
+    private func profileIconsPreview(for diet: Diet) -> some View {
+        let associatedProfiles = profiles.filter { $0.diets.contains(where: { $0.id == diet.id }) }
+        let displayProfiles = associatedProfiles.prefix(3)
+        let remainingCount = max(associatedProfiles.count - displayProfiles.count, 0)
+        HStack(spacing: -10) {
+            ForEach(displayProfiles) { profile in
+                ZStack {
+                    Circle()
+                        .fill(.clear)
+                        .frame(width: 28, height: 28)
+                        .overlay(
+                            Circle()
+                                .fill(effectManager.isLightRowTextColor ? .black : .white)
+                                .stroke(effectManager.currentGlobalAccentColor, lineWidth: 1)
+                        )
+                    
+                    
+                    if let data = profile.photoData, let ui = UIImage(data: data) {
+                        Image(uiImage: ui)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 26, height: 26)
+                            .clipShape(Circle())
+                    } else {
+                        ZStack {
+                            Circle().fill(effectManager.currentGlobalAccentColor.opacity(0.2))
+                            Text(String(profile.name.first ?? "?"))
+                                .font(.caption2).bold()
+                                .foregroundColor(effectManager.currentGlobalAccentColor)
+                        }
+                        .frame(width: 26, height: 26)
+                    }
+                }
+            }
+            if remainingCount > 0 {
+                ZStack {
+                    Circle()
+                        .fill(.clear)
+                        .frame(width: 28, height: 28)
+                        .overlay(
+                            Circle()
+                                .fill(effectManager.isLightRowTextColor ? .black : .white)
+                                .stroke(effectManager.currentGlobalAccentColor, lineWidth: 0.5)
+                        )
+                    ZStack {
+                        Circle().fill(effectManager.currentGlobalAccentColor.opacity(0.2))
+                        Text("+\(remainingCount)")
+                            .font(.caption2).bold()
+                            .foregroundColor(effectManager.currentGlobalAccentColor)
+                    }
+                    .frame(width: 26, height: 26)
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var profileSelectionSheet: some View {
+        ZStack(alignment: .bottom) {
+            
+            if effectManager.isLightRowTextColor {
+                Color.black.opacity(0.4).ignoresSafeArea()
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            editingDietProfilesFor = nil
+                            navBarIsHiden = false
+                        }
+                    }
+            } else {
+                Color.white.opacity(0.4).ignoresSafeArea()
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            editingDietProfilesFor = nil
+                            navBarIsHiden = false
+                        }
+                    }
+            }
+            
+            
+            VStack(spacing: 8) {
+                ZStack {
+                    HStack {
+                        Text("Assign '\(editingDietProfilesFor?.name ?? "")' to Profiles")
+                            .font(.headline)
+                            .foregroundColor(effectManager.currentGlobalAccentColor)
+                        Spacer()
+                        Button("Done") {
+                            saveDietProfileAssignments()
+                        }
+                        .foregroundColor(effectManager.currentGlobalAccentColor)
+                        .padding(.horizontal, 10).padding(.vertical, 5)
+                        .glassCardStyle(cornerRadius: 20)
+                    }
+                }
+                .padding(.horizontal).frame(height: 35)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(profiles) { profile in
+                            Button {
+                                if stagingProfileIDs.contains(profile.id) {
+                                    stagingProfileIDs.remove(profile.id)
+                                } else {
+                                    stagingProfileIDs.insert(profile.id)
+                                }
+                            } label: {
+                                HStack(spacing: 12) {
+                                    if let data = profile.photoData, let ui = UIImage(data: data) {
+                                        Image(uiImage: ui)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 40, height: 40)
+                                            .clipShape(Circle())
+                                    } else {
+                                        Image(systemName: "person.circle")
+                                            .font(.system(size: 40))
+                                            .foregroundColor(effectManager.currentGlobalAccentColor.opacity(1))
+                                    }
+                                    
+                                    Text(profile.name)
+                                        .foregroundColor(effectManager.currentGlobalAccentColor)
+                                    
+                                    Spacer()
+                                    
+                                    if stagingProfileIDs.contains(profile.id) {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(effectManager.currentGlobalAccentColor)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.bottom, 150)
+                }
+            }
+            .padding(.top)
+            .background(.ultraThinMaterial)
+            .cornerRadius(20, corners: [.topLeft, .topRight])
+            .frame(maxHeight: UIScreen.main.bounds.height * 0.55)
+            .transition(.move(edge: .bottom))
+        }
+        .ignoresSafeArea(.container, edges: .bottom)
+        .zIndex(1)
+    }
+    
+    private func updateFilteredDiets() {
+        if globalSearchText.isEmpty {
+            filteredDiets = allDiets
+        } else {
+            filteredDiets = allDiets.filter { $0.name.localizedCaseInsensitiveContains(globalSearchText) }
+        }
+    }
+    
+    private func deleteDiet(_ diet: Diet) {
+        do {
+            let allFoodItems = try modelContext.fetch(FetchDescriptor<FoodItem>())
+            for item in allFoodItems {
+                item.diets?.removeAll { $0.id == diet.id }
+            }
+            
+            let allProfiles = try modelContext.fetch(FetchDescriptor<Profile>())
+            for profile in allProfiles {
+                profile.diets.removeAll { $0.id == diet.id }
+            }
+            
+            modelContext.delete(diet)
+            try modelContext.save()
+        } catch {
+            print("Failed to delete diet and update relationships: \(error)")
+        }
+    }
+    
+    @ViewBuilder
+    private func swipeActions(for item: FoodItem) -> some View {
+        Group {
+            if item.isUserAdded {
+                Button(role: .destructive) {
+                    if #available(iOS 26.0, *) {
+                        // На iOS 26 първо смятаме колко пъти се използва
+                        let usage = vm.foodUsageCount(item)
+                        if usage == 0 {
+                            // Няма връзки → директно триене
+                            withAnimation {
+                                vm.delete(item)
+                            }
+                        } else {
+                            // Има връзки → показваме алерта с детайли
+                            self.itemToDelete = item
+                            self.itemUsageCount = usage
+                            self.isShowingDeleteItemConfirmation = true
+                        }
+                    } else {
+                        // На по-стари iOS винаги минаваме през алерт
+                        self.itemToDelete = item
+                        self.itemUsageCount = vm.foodUsageCount(item)
+                        self.isShowingDeleteItemConfirmation = true
+                    }
+                } label: {
+                    Image(systemName: "trash.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(effectManager.currentGlobalAccentColor)
+                }
+                .tint(.clear)
+            }
+            
+            Button {
+                if item.isMenu {
+                    present(item: .duplicateMenu(FoodItemCopy(from: item)))
+                } else if item.isRecipe {
+                    present(item: .duplicateRecipe(FoodItemCopy(from: item)))
+                } else {
+                    present(item: .duplicateFood(FoodItemCopy(from: item)))
+                }
+            } label: {
+                Image(systemName: "doc.on.doc")
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(effectManager.currentGlobalAccentColor)
+            }
+            .tint(.clear)
+            
+            if item.isUserAdded {
+                Button {
+                    if item.isMenu {
+                        present(item: .editMenu(item))
+                    } else if item.isRecipe {
+                        present(item: .editRecipe(item))
+                    } else {
+                        present(item: .editFood(item))
+                    }
+                } label: {
+                    Image(systemName: "pencil")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(effectManager.currentGlobalAccentColor)
+                }
+                .tint(.clear)
+            }
+        }
+    }
+    
+    private func dragGesture(geometry: GeometryProxy) -> some Gesture {
+        DragGesture(minimumDistance: 0)
+            .updating($gestureDragOffset) { value, state, _ in
+                state = value.translation
+                DispatchQueue.main.async { self.isPressed = true }
+            }
+            .onChanged { value in
+                if abs(value.translation.width) > 10 || abs(value.translation.height) > 10 {
+                    self.isDragging = true
+                }
+            }
+            .onEnded { value in
+                self.isPressed = false
+                if isDragging {
+                    var newOffset = self.buttonOffset
+                    newOffset.width += value.translation.width
+                    newOffset.height += value.translation.height
+                    
+                    let buttonRadius: CGFloat = 40
+                    let viewSize = geometry.size
+                    let safeArea = geometry.safeAreaInsets
+                    let minY = -viewSize.height + buttonRadius + safeArea.top
+                    let maxY = -25 + safeArea.bottom
+                    newOffset.height = min(maxY, max(minY, newOffset.height))
+                    
+                    self.buttonOffset = newOffset
+                    self.saveButtonPosition()
+                } else {
+                    self.handleButtonTap()
+                }
+                self.isDragging = false
+            }
+    }
+    
+    private func bottomPadding(for geometry: GeometryProxy) -> CGFloat {
+        guard geometry.size.width > 0 else { return 75 }
+        let isTallScreen = (geometry.size.height / geometry.size.width) > 1.9
+        return isTallScreen ? 75 : 95
+    }
+    
+    private func trailingPadding(for geometry: GeometryProxy) -> CGFloat { 45 }
+    
+    private func addButton(geometry: GeometryProxy) -> some View {
+        let currentOffset = CGSize(
+            width: buttonOffset.width + gestureDragOffset.width,
+            height: buttonOffset.height + gestureDragOffset.height
+        )
+        let scale = isDragging ? 1.15 : (isPressed ? 0.9 : 1.0)
+        
+        return ZStack {
+            Image(systemName: "widget.large.badge.plus")
+                .font(.title3)
+                .foregroundColor(effectManager.currentGlobalAccentColor)
+        }
+        .frame(width: 60, height: 60)
+        .glassCardStyle(cornerRadius: 32)
+        .scaleEffect(scale)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isDragging)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
+        .contentShape(Rectangle())
+        .padding(.trailing, trailingPadding(for: geometry))
+        .padding(.bottom, bottomPadding(for: geometry))
+        .offset(currentOffset)
+        .opacity(isAddButtonVisible ? 1 : 0)
+        .disabled(!isAddButtonVisible)
+        .gesture(dragGesture(geometry: geometry))
+        .transition(.scale.combined(with: .opacity))
+    }
+    
+    private func present(item: PresentedItem) {
+        //        let shouldDismissSearch: Bool = {
+        //            switch item {
+        //            case .newDiet, .editDiet, .detailDiet:
+        //                return false
+        //            default:
+        //                return true
+        //            }
+        //        }()
+        //
+        if isSearching {
+            SIsSearching = isSearching
+            SglobalSearchText = globalSearchText
+        }
+        if /*shouldDismissSearch &&*/ isSearching {
+            onDismissSearch()
+        }
+        
+        withAnimation(.easeInOut(duration: 0.3)) {
+            presentedItem = item
+            isAddButtonVisible = false
+            
+            let shouldHideNav: Bool
+            // --- НАЧАЛО НА ПРОМЯНАТА ---
+            // Разширяваме логиката, за да включим всички случаи,
+            // които трябва да скрият навигационната лента.
+            switch item {
+            case .newFood, .editFood, .duplicateFood, .detail, .detailDiet, .detailPlan:
+                shouldHideNav = true
+            default:
+                // Всички останали случаи (като .newRecipe, .editDiet и т.н.)
+                // ще оставят лентата видима по подразбиране.
+                shouldHideNav = false
+            }
+            // --- КРАЙ НА ПРОМЯНАТА ---
+            
+            navBarIsHiden = shouldHideNav
+            isProfilesDrawerVisible = false
+        }
+    }
+    
+    private func handleButtonTap() {
+        switch vm.filter {
+        case .foods:
+            present(item: .newFood)
+        case .recipes:
+            present(item: .newRecipe)
+        case .menus:
+            present(item: .newMenu)
+        case .diets:
+            present(item: .newDiet)
+        case .plans:
+            present(item: .newPlan)
+        default:
+            break
+        }
+    }
+    
+    private func saveButtonPosition() {
+        let defaults = UserDefaults.standard
+        defaults.set(buttonOffset.width, forKey: "\(buttonPositionKey)_width")
+        defaults.set(buttonOffset.height, forKey: "\(buttonPositionKey)_height")
+    }
+    
+    private func loadButtonPosition() {
+        let defaults = UserDefaults.standard
+        let width = defaults.double(forKey: "\(buttonPositionKey)_width")
+        let height = defaults.double(forKey: "\(buttonPositionKey)_height")
+        self.buttonOffset = CGSize(width: width, height: height)
+    }
+    
+    private func saveDietProfileAssignments() {
+        guard let diet = editingDietProfilesFor else { return }
+        
+        for profile in profiles {
+            let profileHasDiet = profile.diets.contains { $0.id == diet.id }
+            let profileShouldHaveDiet = stagingProfileIDs.contains(profile.id)
+            
+            if profileShouldHaveDiet && !profileHasDiet {
+                profile.diets.append(diet)
+            } else if !profileShouldHaveDiet && profileHasDiet {
+                profile.diets.removeAll { $0.id == diet.id }
+            }
+        }
+        
+        do {
+            try modelContext.save()
+        } catch {
+            print("Error saving diet-profile associations: \(error)")
+        }
+        
+        withAnimation {
+            editingDietProfilesFor = nil
+            navBarIsHiden = false
+        }
+    }
+    
+    private struct FoodRow: View {
+        let item: FoodItem
+        let textColor: Color
+        let onItemTapped: () -> Void
+        
+        var body: some View {
+            FoodItemRowView(item: item)
+                .foregroundColor(textColor)
+                .contentShape(Rectangle())
+                .onTapGesture { onItemTapped() }
+        }
+    }
+
+}
+
+понякога когато изтрия храна и ми дава 
+SwiftData/BackingData.swift:1035: Fatal error: This model instance was invalidated because its backing data could no longer be found the store. PersistentIdentifier(id: SwiftData.PersistentIdentifier.ID(backing: SwiftData.PersistentIdentifier.PersistentIdentifierBacking.managedObjectID(0xa7c5b9ca1b3b6c79 <x-coredata://6C3F8805-548B-410E-A24E-1B509FAF537D/MineralsData/p11904>)))
+
+
+import Foundation
+import SwiftData
+
+@Model
+final class IndexingJob {
+    /// The unique ID of the FoodItem that needs to be re-indexed.
+    @Attribute(.unique)
+    var foodID: Int
+    
+    /// The date the job was created, useful for debugging.
+    var creationDate: Date
+
+    init(foodID: Int) {
+        self.foodID = foodID
+        self.creationDate = .now
+    }
+}
+import Foundation
+import SwiftData
+
+/// Съхраняваме и нормализираното име (`nameKey`) за бърз текстов филтър без доп. заявки към DB.
+public struct FoodRank: Codable, Hashable {
+    public let foodID: Int
+    public let value: Double            // стойност на нутриента (в еднаква метрика)
+    public let nameKey: String          // lowercased + без диакритика за търсене
+}
+
+@Model
+final class NutrientIndex {
+    /// "vit_vitaminC", "min_iron", и т.н.
+    @Attribute(.unique)
+    var nutrientID: String
+
+    /// JSON-енкодиран масив от FoodRank, вече сортиран по value (desc).
+    var rankedFoodsData: Data?
+
+    var rankedFoods: [FoodRank] {
+        get {
+            guard let data = rankedFoodsData,
+                  let ranks = try? JSONDecoder().decode([FoodRank].self, from: data) else { return [] }
+            return ranks
+        }
+        set {
+            rankedFoodsData = try? JSONEncoder().encode(newValue)
+        }
+    }
+
+    init(nutrientID: String, rankedFoods: [FoodRank]) {
+        self.nutrientID = nutrientID
+        self.rankedFoods = rankedFoods
+    }
+}
+
+// MARK: - Helpers (pure)
+extension NutrientIndex {
+    
+    // ----- START OF CORRECTION -----
+    // This function is simplified to perform a single-phase search.
+    // The concept of `startsWith` vs `contains` phases is removed for nutrient-sorted lists.
+    
+    /// Връща порция от IDs, вече филтрирани по текст и изключени елементи, в подредба по нутриент.
+    static func pagedIDs(
+        from ranks: [FoodRank],
+        matching needle: String,               // вече normalized (folded)
+        excluding excluded: Set<Int>,
+        offset: Int,
+        limit: Int
+    ) -> [Int] {
+        let seq = ranks.lazy
+            .filter { !excluded.contains($0.foodID) }
+            .filter {
+                // If there's no search text, include all items.
+                if needle.isEmpty { return true }
+                // Otherwise, simply check if the normalized name contains the search term.
+                return $0.nameKey.contains(needle)
+            }
+            .dropFirst(offset)
+            .prefix(limit)
+        return Array(seq.map(\.foodID))
+    }
+    // ----- END OF CORRECTION -----
+    
+    // This enum is no longer needed for the simplified nutrient search
+    // but might be used elsewhere. It's safe to keep.
+    enum TextPhase { case startsWith, contains }
+}
+import Foundation
+import SwiftData
+
+@MainActor
+enum IndexingManager {
+
+    /// Updates the nutrient and name indexes for a single FoodItem.
+    /// This should be called after a FoodItem is created, duplicated, or modified.
+    static func updateIndexes(for foodItem: FoodItem, context: ModelContext) async {
+        print("🚀 Starting indexing for: \(foodItem.name) (ID: \(foodItem.id))")
+
+        // 1. Update all nutrient-based indexes
+        await updateNutrientIndexes(for: foodItem, context: context)
+        
+        // 2. Update the name-based index
+        await updateNameIndex(for: foodItem, context: context)
+
+        // 3. Save any changes made to the indexes
+        do {
+            if context.hasChanges {
+                try context.save()
+                print("✅ Indexing complete and saved for: \(foodItem.name)")
+            } else {
+                print("ℹ️ No index changes to save for: \(foodItem.name)")
+            }
+        } catch {
+            print("❌ Failed to save context after indexing: \(error)")
+        }
+    }
+
+    private static func updateNutrientIndexes(for foodItem: FoodItem, context: ModelContext) async {
+        // Fetch all possible nutrient IDs to iterate through
+        let allVitamins = (try? context.fetch(FetchDescriptor<Vitamin>())) ?? []
+        let allMinerals = (try? context.fetch(FetchDescriptor<Mineral>())) ?? []
+        let allNutrientIDs = allVitamins.map { "vit_\($0.id)" } + allMinerals.map { "min_\($0.id)" }
+
+        // Fetch all index objects at once for efficiency
+        let allIndexes = (try? context.fetch(FetchDescriptor<NutrientIndex>())) ?? []
+        let indexMap = Dictionary(uniqueKeysWithValues: allIndexes.map { ($0.nutrientID, $0) })
+
+        for nutrientID in allNutrientIDs {
+            // Get or create the index for the current nutrient
+            let index = indexMap[nutrientID] ?? NutrientIndex(nutrientID: nutrientID, rankedFoods: [])
+            if index.modelContext == nil {
+                context.insert(index)
+            }
+
+            // Remove the old entry for this food item, if it exists
+            index.rankedFoods.removeAll { $0.foodID == foodItem.id }
+
+            // Get the aggregated nutrient value. This works for simple foods, recipes, and menus.
+            guard let (value, unit) = foodItem.value(of: nutrientID), value > 0 else {
+                continue // No value for this nutrient, so nothing to index.
+            }
+
+            // Normalize to per 100 g
+            let referenceWeight = foodItem.referenceWeightG
+            guard referenceWeight > 0 else { continue }
+
+            let valuePer100g = (value / referenceWeight) * 100.0
+            let valueInMg = toMg(value: valuePer100g, unit: unit)
+            guard valueInMg > 0.00001 else { continue }
+            
+            // Create the new rank object
+            let newRank = FoodRank(foodID: foodItem.id, value: valueInMg, nameKey: foodItem.nameNormalized)
+            
+            // Insert in descending order
+            if let insertionIndex = index.rankedFoods.firstIndex(where: { $0.value < newRank.value }) {
+                index.rankedFoods.insert(newRank, at: insertionIndex)
+            } else {
+                index.rankedFoods.append(newRank)
+            }
+        }
+    }
+    
+    private static func updateNameIndex(for foodItem: FoodItem, context: ModelContext) async {
+        let descriptor = FetchDescriptor<NameIndex>()
+        guard let nameIndex = (try? context.fetch(descriptor))?.first else {
+             print("⚠️ NameIndex not found. Cannot update name for \(foodItem.name).")
+            return
+        }
+
+        // Remove old entry if it exists to prevent duplicates
+        nameIndex.entries.removeAll { $0.foodID == foodItem.id }
+        
+        // Add the new or updated entry
+        let newEntry = NameEntry(foodID: foodItem.id, nameKey: foodItem.nameNormalized)
+        nameIndex.entries.append(newEntry)
+    }
+}
+import Foundation
+import SwiftData
+
+@MainActor
+class IndexingQueueManager {
+    static let shared = IndexingQueueManager()
+    private var modelContainer: ModelContainer?
+    private var debounceTimer: Timer?
+
+    private init() {}
+
+    func setup(container: ModelContainer) {
+        self.modelContainer = container
+    }
+
+    /// Persistently queues a FoodItem for re-indexing.
+    func queueForIndexing(foodID: Int) {
+        guard let modelContext = modelContainer?.mainContext else { return }
+
+        // Prevent adding a duplicate job if one already exists for this foodID.
+        let descriptor = FetchDescriptor<IndexingJob>(predicate: #Predicate { $0.foodID == foodID })
+        if let existingCount = try? modelContext.fetchCount(descriptor), existingCount > 0 {
+            print("📦 [IndexingQueue] Job for foodID \(foodID) is already in the queue.")
+            return
+        }
+        
+        let newJob = IndexingJob(foodID: foodID)
+        modelContext.insert(newJob)
+        
+        // Save the job immediately to ensure it's persisted.
+        try? modelContext.save()
+        print("📦 [IndexingQueue] Queued job for foodID \(foodID).")
+
+        // Schedule the queue to be processed after a short delay.
+        debounceTimer?.invalidate()
+        debounceTimer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
+            self?.processQueue()
+        }
+    }
+
+    /// Fetches all pending jobs from SwiftData and processes them in the background.
+    func processQueue() {
+        guard let container = modelContainer else { return }
+        
+        Task { @MainActor in
+            let context = ModelContext(container)
+            let jobsToProcess = (try? context.fetch(FetchDescriptor<IndexingJob>())) ?? []
+            
+            guard !jobsToProcess.isEmpty else {
+                print("✅ [IndexingQueue] Queue is empty. Nothing to process.")
+                return
+            }
+
+            print("🚀 [IndexingQueue] Processing \(jobsToProcess.count) items in the background.")
+
+            // Pass only the Sendable container and IDs to the background task.
+            let foodIDs = jobsToProcess.map { $0.foodID }
+
+            Task.detached(priority: .background) {
+                let bgContext = ModelContext(container)
+                
+                for foodID in foodIDs {
+                    // Fetch the full FoodItem on the background thread.
+                    let foodDescriptor = FetchDescriptor<FoodItem>(predicate: #Predicate { $0.id == foodID })
+                    if let foodItem = try? bgContext.fetch(foodDescriptor).first {
+                        // Perform the indexing.
+                        await self.updateIndexesInBackground(for: foodItem, context: bgContext)
+                    }
+                    
+                    // After processing, delete the job from the queue.
+                    let jobDescriptor = FetchDescriptor<IndexingJob>(predicate: #Predicate { $0.foodID == foodID })
+                    if let job = try? bgContext.fetch(jobDescriptor).first {
+                        bgContext.delete(job)
+                    }
+                }
+                
+                // Save the changes (deletions of jobs and updates to indexes).
+                if bgContext.hasChanges {
+                    do {
+                        try bgContext.save()
+                        await MainActor.run {
+                            print("✅ [IndexingQueue] Background indexing complete and saved.")
+                        }
+                    } catch {
+                        await MainActor.run {
+                            print("❌ [IndexingQueue] Failed to save background context: \(error)")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // This function is now non-isolated and safe to call from any thread.
+    nonisolated private func updateIndexesInBackground(for foodItem: FoodItem, context: ModelContext) async {
+        let allVitamins = (try? context.fetch(FetchDescriptor<Vitamin>())) ?? []
+        let allMinerals = (try? context.fetch(FetchDescriptor<Mineral>())) ?? []
+        let allNutrientIDs = allVitamins.map { "vit_\($0.id)" } + allMinerals.map { "min_\($0.id)" }
+        
+        let allIndexes = (try? context.fetch(FetchDescriptor<NutrientIndex>())) ?? []
+        let indexMap = Dictionary(uniqueKeysWithValues: allIndexes.map { ($0.nutrientID, $0) })
+
+        for nutrientID in allNutrientIDs {
+            let index = indexMap[nutrientID] ?? NutrientIndex(nutrientID: nutrientID, rankedFoods: [])
+            if index.modelContext == nil { context.insert(index) }
+
+            index.rankedFoods.removeAll { $0.foodID == foodItem.id }
+
+            guard let (value, unit) = foodItem.value(of: nutrientID), value > 0 else { continue }
+            let referenceWeight = foodItem.referenceWeightG
+            guard referenceWeight > 0 else { continue }
+
+            let valuePer100g = (value / referenceWeight) * 100.0
+            let valueInMg = Self.toMg(value: valuePer100g, unit: unit)
+            guard valueInMg > 0.00001 else { continue }
+            
+            let newRank = FoodRank(foodID: foodItem.id, value: valueInMg, nameKey: foodItem.nameNormalized)
+            
+            if let insertionIndex = index.rankedFoods.firstIndex(where: { $0.value < newRank.value }) {
+                index.rankedFoods.insert(newRank, at: insertionIndex)
+            } else {
+                index.rankedFoods.append(newRank)
+            }
+        }
+
+        let nameIndexDescriptor = FetchDescriptor<NameIndex>()
+        if let nameIndex = (try? context.fetch(nameIndexDescriptor))?.first {
+            nameIndex.entries.removeAll { $0.foodID == foodItem.id }
+            nameIndex.entries.append(NameEntry(foodID: foodItem.id, nameKey: foodItem.nameNormalized))
+        }
+    }
+
+    nonisolated private static func toMg(value: Double, unit: String) -> Double {
+        switch unit.lowercased() {
+        case "g": return value * 1_000
+        case "µg", "mcg": return value * 0.001
+        default: return value
+        }
+    }
+}
+import SwiftUI
+import SwiftData
+import UIKit
+
+struct FoodItemRowView: View {
+    let item: FoodItem
+    @ObservedObject private var effectManager = EffectManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.modelContext) private var modelContext
+
+    private var displayWeightG: Double? {
+        if item.isRecipe || item.isMenu { return item.totalWeightG }
+        let stored = item.other?.weightG?.value ?? 0
+        if stored > 0 { return stored }
+        let p = item.totalProtein?.value ?? 0
+        let f = item.totalFat?.value ?? 0
+        let c = item.totalCarbohydrates?.value ?? 0
+        let fallback = p + f + c
+        return fallback > 0 ? fallback : nil
+    }
+
+    private var displayKcal: Double? {
+        if let agg = item.totalEnergyKcal?.value { return agg }
+        if let explicit = item.other?.energyKcal?.value, explicit > 0 { return explicit }
+        let protein = (item.totalProtein?.value ?? 0) * 4
+        let fat     = (item.totalFat?.value ?? 0) * 9
+        let carbs   = (item.totalCarbohydrates?.value ?? 0) * 4
+        let tot = protein + fat + carbs
+        return tot > 0 ? tot : nil
+    }
+
+    private var chartDisplayInformation: ChartDisplayData {
+        var segments: [NutrientProportionData] = []
+        var referenceWeight: Double? = nil
+        let protein = item.totalProtein?.value ?? 0
+        let fat     = item.totalFat?.value ?? 0
+        let carbs   = item.totalCarbohydrates?.value ?? 0
+        if let w = displayWeightG, w > 0 {
+            if protein > 0 { segments.append(.init(name: "Protein", value: protein, color: Color(hex: "E6E0F8"))) }
+            if fat     > 0 { segments.append(.init(name: "Fat",     value: fat,     color: Color(hex: "FFE5CC"))) }
+            if carbs   > 0 { segments.append(.init(name: "Carbs",   value: carbs,   color: Color(hex: "D6ECFF"))) }
+            referenceWeight = w
+        } else {
+            let pk = protein * 4; let fk = fat * 9; let ck = carbs * 4
+            if pk > 0 { segments.append(.init(name: "Protein (kcal)", value: pk, color: Color(hex: "E6E0F8"))) }
+            if fk > 0 { segments.append(.init(name: "Fat (kcal)",     value: fk, color: Color(hex: "FFE5CC"))) }
+            if ck > 0 { segments.append(.init(name: "Carbs (kcal)",   value: ck, color: Color(hex: "D6ECFF"))) }
+        }
+        return ChartDisplayData(
+            proportions: segments.sorted { $0.value > $1.value },
+            centralKcalDisplay: displayKcal,
+            totalReferenceForChart: referenceWeight
+        )
+    }
+
+    private var topVitamins: [DisplayableNutrient] { item.topVitamins(count: 4) }
+    private var topMinerals: [DisplayableNutrient] { item.topMinerals(count: 4) }
+
+    private var descriptionOrIngredientsText: String? {
+        if item.isRecipe || item.isMenu {
+            guard let links = item.ingredients, !links.isEmpty else {
+                return item.itemDescription?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty()
+            }
+            let first = links.prefix(3).map { $0.food?.name ?? "Ingredient" }
+            var txt = first.joined(separator: ", ")
+            if links.count > 3 { txt += "..." }
+            return txt
+        } else {
+            return item.itemDescription?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty()
+        }
+    }
+
+    var body: some View {
+        let chartInfo = chartDisplayInformation
+
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                NutrientProportionDonutChartView(
+                    proportions: chartInfo.proportions,
+                    centralImageUIImage: item.foodImage(),
+                    imagePlaceholderSystemName: "fork.knife.circle.fill",
+                    centralContentDiameter: 60,
+                    donutRingThickness: 5,
+                    canalRingThickness: 5,
+                    adaptiveTextColor: effectManager.currentGlobalAccentColor,
+                    ringTrackColor: effectManager.currentGlobalAccentColor.opacity(0.1),
+                    totalEnergyKcal: chartInfo.centralKcalDisplay,
+                    totalReferenceValue: chartInfo.totalReferenceForChart
+                )
+                .frame(width: 80, height: 80)
+                .padding(.top, 2)
+               
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .top) {
+                        Text(item.name)
+                            .font(.headline.weight(.bold))
+                            .foregroundColor(effectManager.currentGlobalAccentColor)
+                            .lineLimit(2)
+                        
+                        Spacer()
+
+                        Button(action: {
+                            withAnimation(.spring()) {
+                                item.isFavorite.toggle()
+                            }
+                            // ✅ Запази и съобщи
+                            try? modelContext.save()
+                            NotificationCenter.default.post(name: .foodFavoriteToggled, object: item)
+                        }) {
+                            Image(systemName: item.isFavorite ? "star.fill" : "star")
+                                .foregroundColor(.yellow)
+                                .font(.title3)
+                                .padding(4)
+                        }
+                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
+                    }
+                    .animation(.spring(), value: item.isFavorite)
+
+                    if let txt = descriptionOrIngredientsText, !txt.isEmpty {
+                        Text(txt)
+                            .font(.caption)
+                            .foregroundColor(effectManager.currentGlobalAccentColor.opacity(0.8))
+                            .lineLimit(2)
+                    }
+
+                    if displayWeightG != nil || displayKcal != nil {
+                        weightAndCaloriesText()
+                            .font(.caption2)
+                            .foregroundColor(effectManager.currentGlobalAccentColor.opacity(0.8))
+                            .padding(.top, 2)
+                    }
+                }
+                .layoutPriority(1)
+            }
+
+            let nutrients = topVitamins + topMinerals
+            let allergens = item.allergens ?? []
+            
+            if !nutrients.isEmpty || !allergens.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    ChipScrollView(title: "Top Nutrients", items: nutrients, textColor: effectManager.currentGlobalAccentColor)
+                    ChipScrollView(title: "Allergens", items: allergens, textColor: effectManager.currentGlobalAccentColor, isAlertSection: true)
+                }
+            }
+        }
+        .padding()
+        .glassCardStyle(cornerRadius: 20)
+    }
+    
+    @ViewBuilder
+    private func weightAndCaloriesText() -> some View {
+        let k = displayKcal.map { formatted($0, unit: "kcal") }
+
+        HStack(spacing: 12) {
+            if let weightInGrams = displayWeightG {
+                let displayWeight = UnitConversion.formatGramsToFoodDisplay(weightInGrams)
+                Text("\(displayWeight.value) \(displayWeight.unit)")
+            }
+
+            if displayWeightG != nil && k != nil {
+                Circle().fill(effectManager.currentGlobalAccentColor.opacity(0.3)).frame(width: 3, height: 3)
+            }
+            if let k { Text(k) }
+        }
+    }
+    
+    private func formatted(_ value: Double, unit: String) -> String {
+        let (scaled, newUnit) = autoScale(value, unit: unit)
+        let str: String
+        
+        if scaled.truncatingRemainder(dividingBy: 1) == 0 {
+            str = String(format: "%.0f", scaled)
+        } else if scaled < 0.1 && scaled > 0 && newUnit.lowercased() != "kcal" {
+            str = String(format: "%.2f", scaled)
+        } else {
+            str = String(format: "%.1f", scaled)
+        }
+        return "\(str) \(newUnit)"
+    }
+    
+    private func autoScale(_ value: Double, unit: String) -> (Double, String) {
+        var v = value, u = unit.lowercased()
+        while v >= 1000 {
+            switch u {
+            case "ng": v /= 1000; u = "µg"
+            case "µg", "mcg": v /= 1000; u = "mg"
+            case "mg": v /= 1000; u = "g"
+            case "g": v /= 1000; u = "kg"
+            default: return (v, unit)
+            }
+        }
+        return (v, u == unit.lowercased() ? unit : u)
+    }
+    
+}
+
+дали е възможно понеже още не се е интексирала и от това да става или някое вю да се опита да вземе данни за нея като например FoodItemListView или FoodItemRowView
+предполагам че е от Indexing

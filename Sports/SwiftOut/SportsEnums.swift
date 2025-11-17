@@ -1,4 +1,4 @@
-// Auto-generated from lll_completed.csv
+// Auto-generated from lll_completed_normalized.csv
 import Foundation
 
 public enum MuscleGroup: String, Codable, CaseIterable {
@@ -61,32 +61,23 @@ public enum Sport: String, Codable, CaseIterable {
     case judo = "Judo"
     case jumpRope = "Jump Rope"
     case kayaking = "Kayaking"
-    case kettlebellSport = "Kettlebell Sport"
     case kettlebellTraining = "Kettlebell Training"
     case kickboxing = "Kickboxing"
     case martialArts = "Martial Arts"
-    case militaryTraining = "Military Training"
-    case mobility = "Mobility"
     case obstacleCourseRacing = "Obstacle Course Racing"
     case olympicWeightlifting = "Olympic Weightlifting"
     case parkour = "Parkour"
     case partnerTraining = "Partner Training"
     case pilates = "Pilates"
-    case plyometrics = "Plyometrics"
-    case rehabilitation = "Rehabilitation"
     case rockClimbing = "Rock Climbing"
     case rollerSkating = "Roller Skating"
-    case rotationalSports = "Rotational Sports"
     case rowing = "Rowing"
     case running = "Running"
     case skateboarding = "Skateboarding"
     case skiing = "Skiing"
-    case soccer = "Soccer"
     case speedSkating = "Speed Skating"
-    case sportsPerformance = "Sports Performance"
     case strengthTraining = "Strength Training"
     case surfing = "Surfing"
-    case suspensionTraining = "Suspension Training"
     case swimming = "Swimming"
     case tennis = "Tennis"
     case triathlon = "Triathlon"
