@@ -18,7 +18,7 @@ from pathlib import Path
 # ────────────────────────────────────────────────────────────────────────
 # 1) I/O
 # ────────────────────────────────────────────────────────────────────────
-CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("foods_with_ph.csv")
+CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("foods_merged.csv")
 OUT_DIR  = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("SwiftOut")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
