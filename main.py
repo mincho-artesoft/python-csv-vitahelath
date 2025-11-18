@@ -18,7 +18,7 @@ from pathlib import Path
 # ────────────────────────────────────────────────────────────────────────
 # 1) I/O
 # ────────────────────────────────────────────────────────────────────────
-CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("foods_filtered_keep_only_names_from_111.csv")
+CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("foods_with_ph.csv")
 OUT_DIR  = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("SwiftOut")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -50,6 +50,10 @@ def swift_case_name(s: str) -> str:
 UNIT_MAP = dict(UG="µg", MG="mg", G="g", KCAL="kcal")
 
 def unit_of(col: str) -> str:
+    # специален случай за pH
+    if "alkalinity ph" in col.lower():
+        return "pH"
+
     m = re.findall(r"\(([^()]+)\)", col)
     if not m:
         return ""
@@ -58,8 +62,15 @@ def unit_of(col: str) -> str:
         raw = raw.replace(k, v)
     return raw
 
+
 def to_float(x):
-    return None if pd.isna(x) else float(x)
+    if pd.isna(x):
+        return None
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return None
+
 
 # ────────────────────────────────────────────────────────────────────────
 # 4) Build enums (category/diets/allergens)
@@ -269,6 +280,7 @@ groups = {
          ("weight (G)",          "weightG"),
          ("Ash (G)",             "ash"),
          ("Betaine (MG)",        "betaine"),
+         ("alkalinity Ph (0-14)", "alkalinityPH"),  # НОВО
     ],
 }
 

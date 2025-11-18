@@ -1,4 +1,4 @@
-// Auto-generated from foods_filtered_keep_only_names_from_111.csv
+// Auto-generated from foods_with_ph.csv
 import Foundation
 
 public enum FoodCategory: String, Codable, CaseIterable {
