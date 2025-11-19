@@ -1,24 +1,23 @@
-import csv
+import pandas as pd
 
-INPUT_FILE = "foods_merged.csv"
-OUTPUT_FILE = "foods_names_with_id.csv"
+# 1) Четем CSV файловете
+foods = pd.read_csv("foods_merged.csv")          # има колона: name (+ всички нутриенти)
+enriched = pd.read_csv("enriched_foods.csv")     # колони: ID, Name, description
 
-def main():
-    with open(INPUT_FILE, "r", encoding="utf-8", newline="") as infile, \
-         open(OUTPUT_FILE, "w", encoding="utf-8", newline="") as outfile:
-        
-        reader = csv.DictReader(infile)
-        writer = csv.writer(outfile)
+# 2) Нормализираме имената (без главни/малки, без празни интервали в края/началото)
+foods["name_norm"] = foods["name"].astype(str).str.strip().str.lower()
+enriched["name_norm"] = enriched["Name"].astype(str).str.strip().str.lower()
 
-        # Заглавен ред
-        writer.writerow(["id", "name"])
+# 3) Оставяме само нужните полета от enriched (Name не ни трябва, ако match-ваме по name_norm)
+enriched_small = enriched[["name_norm", "description"]].drop_duplicates(subset=["name_norm"])
 
-        # За всеки ред от оригиналния CSV
-        for idx, row in enumerate(reader, start=1):
-            name = (row.get("name") or "").strip()
-            writer.writerow([idx, name])
+# 4) LEFT JOIN от foods към enriched по нормализираното име
+merged = foods.merge(enriched_small, on="name_norm", how="left")
 
-    print(f"Готово! Създаден е файл: {OUTPUT_FILE}")
+# 5) Премахваме помощната колона name_norm
+merged = merged.drop(columns=["name_norm"])
 
-if __name__ == "__main__":
-    main()
+# 6) Записваме резултата в нов CSV
+merged.to_csv("foods_merged_with_description.csv", index=False)
+
+print("Готово! Записано е в foods_merged_with_description.csv")

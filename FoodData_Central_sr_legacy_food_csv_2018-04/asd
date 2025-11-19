@@ -10766,15 +10766,15 @@ struct SelectedFoodRowView: View {
     @FocusState.Binding var focusedField: FoodItem?
     @State private var textValue: String
 
-    // +++ НАЧАЛО НА ПРОМЯНАТА (1/4) +++
-    // Приемаме байндинг към ID-то на разпънатия елемент от изгледа-родител.
     @Binding var expandedItemID: FoodItem.ID?
     
-    // Изчисляваме дали този конкретен ред трябва да е разпънат.
+    // --- НАЧАЛО НА ПРОМЯНАТА (1/5): Добавяме ново състояние за текста ---
+    @State private var showFullText: Bool
+    // --- КРАЙ НА ПРОМЯНАТА (1/5) ---
+
     private var isExpanded: Bool {
         expandedItemID == item.id
     }
-    // +++ КРАЙ НА ПРОМЯНАТА (1/4) +++
 
     private var isImperial: Bool { GlobalState.measurementSystem == "Imperial" }
     private var displayUnit: String { isImperial ? "oz" : "g" }
@@ -10833,27 +10833,26 @@ struct SelectedFoodRowView: View {
     }
 
     // MARK: – Init
-    // +++ НАЧАЛО НА ПРОМЯНАТА (2/4) +++
-    // Актуализираме инициализатора, за да приеме новия параметър за разпънатия елемент.
     init(item: FoodItem,
          grams: Double,
          isStockSufficient: Bool,
          onGramsChanged: @escaping (Double) -> Void,
          focusedField: FocusState<FoodItem?>.Binding,
-         expandedItemID: Binding<FoodItem.ID?>) // Нов параметър
+         expandedItemID: Binding<FoodItem.ID?>)
     {
         self.item = item
         self.grams = grams
         self.isStockSufficient = isStockSufficient
         self.onGramsChanged = onGramsChanged
         self._focusedField = focusedField
-        self._expandedItemID = expandedItemID // Присвояваме го
+        self._expandedItemID = expandedItemID
+        
+        self._showFullText = State(initialValue: expandedItemID.wrappedValue == item.id)
         
         let isImperial = GlobalState.measurementSystem == "Imperial"
         let displayValue = isImperial ? UnitConversion.gToOz_display(grams) : grams
         _textValue = State(initialValue: UnitConversion.formatDecimal(displayValue))
     }
-    // +++ КРАЙ НА ПРОМЯНАТА (2/4) +++
 
     // MARK: – Body
     var body: some View {
@@ -10874,31 +10873,53 @@ struct SelectedFoodRowView: View {
             .foregroundStyle(effectManager.currentGlobalAccentColor)
 
             VStack(alignment: .leading, spacing: 2) {
-                // +++ НАЧАЛО НА ПРОМЯНАТА (3/4) +++
+                // --- НАЧАЛО НА ПРОМЯНАТА (4/5): Модифицираме Text изгледа и неговите жестове ---
                 Text(item.name)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(effectManager.currentGlobalAccentColor)
-                    // Прилагаме условен модификатор
-                    .if(isExpanded) { view in
-                        // Ако е разпънат, премахваме ограничението за редове.
+                    .if(showFullText) { view in
                         view.fixedSize(horizontal: false, vertical: true)
                     } else: { view in
-                        // В противен случай, ограничаваме до 2 реда.
                         view.lineLimit(2)
                     }
-                    .contentShape(Rectangle()) // Увеличава зоната за тапване
+                    .contentShape(Rectangle())
                     .onTapGesture {
-                        // Анимираме промяната
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            // При тапване, превключваме състоянието.
-                            if isExpanded {
-                                expandedItemID = nil // Свиваме го, ако вече е разпънат
-                            } else {
-                                expandedItemID = item.id // Разпъваме го
+                        if isExpanded {
+                            // СВИВАНЕ
+                            // 1. Първо анимираме изчезването на текста.
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                showFullText = false
                             }
+
+                            // 2. С леко забавяне (след като текстът е изчезнал), анимираме свиването на контейнера.
+                            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                 withAnimation(.easeInOut(duration: 0.3)) {
+                                     expandedItemID = nil
+                                 }
+                            }
+                        } else {
+                            // РАЗГЪВАНЕ
+                            // 1. Анимираме само разширяването на контейнера.
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                expandedItemID = item.id
+                            }
+                            // 2. onChange(of: isExpanded) ще се погрижи да покаже текста след това.
                         }
                     }
-                // +++ КРАЙ НА ПРОМЯНАТА (3/4) +++
+                    .onChange(of: isExpanded) { _, isNowExpanded in
+                        if isNowExpanded {
+                            // 2. След като контейнерът се е разширил (след 0.3 сек), показваме пълния текст.
+                            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    showFullText = true
+                                }
+                            }
+                        } else {
+                            // Предпазна мярка: ако изгледът се свие по друга причина, скриваме текста веднага.
+                            showFullText = false
+                        }
+                    }
+                // --- КРАЙ НА ПРОМЯНАТА (4/5) ---
 
                 if !isStockSufficient {
                     HStack(alignment: .center, spacing: 4) {
@@ -56740,20 +56761,18 @@ struct SelectedExerciseRowView: View {
     @FocusState.Binding var focusedField: TrainingView.FocusableField?
     let focusCase: TrainingView.FocusableField
 
-    // +++ НАЧАЛО НА ПРОМЯНАТА (1/4) +++
-    // Приемаме байндинг към ID-то на разпънатия елемент от TrainingView.
     @Binding var expandedExerciseID: ExerciseItem.ID?
-    // +++ КРАЙ НА ПРОМЯНАТА (1/4) +++
 
     // MARK: - Internal State
     @State private var textValue: String
     
-    // +++ НАЧАЛО НА ПРОМЯНАТА (2/4) +++
-    // Изчисляваме дали този конкретен ред трябва да е разпънат.
+    // --- НАЧАЛО НА ПРОМЯНАТА (1/5): Добавяме ново състояние за текста ---
+    @State private var showFullText: Bool
+    // --- КРАЙ НА ПРОМЯНАТА (1/5) ---
+
     private var isExpanded: Bool {
         expandedExerciseID == exercise.id
     }
-    // +++ КРАЙ НА ПРОМЯНАТА (2/4) +++
     
     private var isFocused: Bool { focusedField == focusCase }
 
@@ -56765,8 +56784,7 @@ struct SelectedExerciseRowView: View {
     }
 
     // MARK: - Initializer
-    // +++ НАЧАЛО НА ПРОМЯНАТА (3/4) +++
-    // Актуализираме инициализатора, за да приеме новия параметър.
+    // --- НАЧАЛО НА ПРОМЯНАТА (2/5): Актуализираме инициализатора ---
     init(
         exercise: ExerciseItem,
         duration: Double,
@@ -56775,7 +56793,7 @@ struct SelectedExerciseRowView: View {
         onDelete: @escaping () -> Void,
         focusedField: FocusState<TrainingView.FocusableField?>.Binding,
         focusCase: TrainingView.FocusableField,
-        expandedExerciseID: Binding<ExerciseItem.ID?> // Нов параметър
+        expandedExerciseID: Binding<ExerciseItem.ID?>
     ) {
         self.exercise = exercise
         self.duration = duration
@@ -56784,10 +56802,13 @@ struct SelectedExerciseRowView: View {
         self.onDelete = onDelete
         self._focusedField = focusedField
         self.focusCase = focusCase
-        self._expandedExerciseID = expandedExerciseID // Присвояваме го
+        self._expandedExerciseID = expandedExerciseID
         self._textValue = State(initialValue: String(format: "%.0f", duration))
+
+        // Задаваме първоначалната стойност на новото състояние
+        self._showFullText = State(initialValue: expandedExerciseID.wrappedValue == exercise.id)
     }
-    // +++ КРАЙ НА ПРОМЯНАТА (3/4) +++
+    // --- КРАЙ НА ПРОМЯНАТА (2/5) ---
 
     // MARK: - Body
     var body: some View {
@@ -56796,31 +56817,53 @@ struct SelectedExerciseRowView: View {
                 .frame(width: 60, height: 60)
 
             VStack(alignment: .leading, spacing: 2) {
-                // +++ НАЧАЛО НА ПРОМЯНАТА (4/4) +++
+                // --- НАЧАЛО НА ПРОМЯНАТА (3/5): Модифицираме Text изгледа и неговите жестове ---
                 Text(exercise.name)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(effectManager.currentGlobalAccentColor)
-                    // Прилагаме условен модификатор
-                    .if(isExpanded) { view in
-                        // Ако е разпънат, премахваме ограничението за редове.
+                    .if(showFullText) { view in
                         view.fixedSize(horizontal: false, vertical: true)
                     } else: { view in
-                        // В противен случай, ограничаваме до 2 реда.
                         view.lineLimit(2)
                     }
-                    .contentShape(Rectangle()) // Увеличава зоната за тапване
+                    .contentShape(Rectangle())
                     .onTapGesture {
-                        // Анимираме промяната
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            // При тапване, превключваме състоянието.
-                            if isExpanded {
-                                expandedExerciseID = nil // Свиваме го, ако вече е разпънат
-                            } else {
-                                expandedExerciseID = exercise.id // Разпъваме го
+                        if isExpanded {
+                            // СВИВАНЕ
+                            // 1. Първо анимираме изчезването на текста.
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                showFullText = false
                             }
+                            
+                            // 2. С леко забавяне, анимираме свиването на контейнера.
+                            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    expandedExerciseID = nil
+                                }
+                            }
+                        } else {
+                            // РАЗГЪВАНЕ
+                            // 1. Анимираме разширяването на контейнера.
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                expandedExerciseID = exercise.id
+                            }
+                            // 2. onChange(of: isExpanded) ще се погрижи да покаже текста след това.
                         }
                     }
-                // +++ КРАЙ НА ПРОМЯНАТА (4/4) +++
+                    .onChange(of: isExpanded) { _, isNowExpanded in
+                        if isNowExpanded {
+                            // 2. След като контейнерът се е разширил (след 0.3 сек), показваме пълния текст.
+                            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    showFullText = true
+                                }
+                            }
+                        } else {
+                            // Предпазна мярка.
+                            showFullText = false
+                        }
+                    }
+                // --- КРАЙ НА ПРОМЯНАТА (3/5) ---
 
                 HStack(spacing: 4) {
                     Image(systemName: "flame.fill")
@@ -68464,4 +68507,4 @@ class IntentHandler: INExtension, INSendMessageIntentHandling, INSearchForMessag
 }
 
 
-може ли в SelectedFoodRowView когато се разпъва първо на се разпъне кутишката след това да се смени текста 
+може ли след проверката че базада е сиидната да направиш един цикъл с всички храни и да провериш кой имат и кой нямат снимки с foodImage тоест тези който нямат снимки в асети да им се принтират имената 

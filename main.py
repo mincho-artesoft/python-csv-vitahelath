@@ -18,7 +18,7 @@ from pathlib import Path
 # ────────────────────────────────────────────────────────────────────────
 # 1) I/O
 # ────────────────────────────────────────────────────────────────────────
-CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("foods_merged.csv")
+CSV_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("foods_merged_with_description.csv")
 OUT_DIR  = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("SwiftOut")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -319,6 +319,16 @@ def row_to_dict(i, row):
         "diets":     enum_json("diets", row.get("diets")),
         "allergens": enum_json("allergens", row.get("allergens")),
     }
+
+    # 🔹 НОВО: description от CSV → desctiption в JSON (за да съвпада с DTO-то)
+    if "description" in df.columns:
+        desc = row.get("description")
+        if pd.isna(desc):
+            d["desctiption"] = None
+        else:
+            d["desctiption"] = str(desc)
+    else:
+        d["desctiption"] = None
 
     # Нутриентни групи (всяка е речник {prop: {value, unit}})
     def pack(keys):

@@ -1,4 +1,4 @@
-// Auto-generated from foods_merged.csv
+// Auto-generated from foods_merged_with_description.csv
 import Foundation
 
 public enum FoodCategory: String, Codable, CaseIterable {
