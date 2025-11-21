@@ -118,11 +118,131 @@ TrainingPlan
 find . \
   -type d \
   \( \
-    -name AI \
+    -name Analytics \
+    -o -name AI \
     -o -name BarcodeScanner \
+    -o -name Calendar \
+    -o -name CustomViews \
+    -o -name Exercise \
+    -o -name Fitness \
+    -o -name Food \
+    -o -name Intents \
+    -o -name Nutrient \
+    -o -name Profile \
+    -o -name Prompt \
+    -o -name Settings \
+    -o -name ShoppingList \
+    -o -name Storage \
+    -o -name Subscriptions \
+    -o -name TrainingPlan \
+    -o -name Pods \
+    -o -name build \
+    -o -name node_modules \
+    -o -name .git \
+  \) -prune -o \
+  -type f \
+  \( \
+    -name '*.swift' \
+    -o -name '*.metal' \
+  \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done
+
+find . \
+  -type d \
+  \( \
+    -name Analytics \
+    -o -name AI \
+    -o -name BarcodeScanner \
+    -o -name CustomViews \
+    -o -name Exercise \
     -o -name Intents \
     -o -name Prompt \
     -o -name Settings \
+    -o -name ShoppingList \
+    -o -name Storage \
+    -o -name Subscriptions \
+    -o -name TrainingPlan \
+    -o -name Pods \
+    -o -name build \
+    -o -name node_modules \
+    -o -name .git \
+  \) -prune -o \
+  -type f \
+  \( \
+    -name '*.swift' \
+    -o -name '*.metal' \
+  \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done
+
+
+gzip -9 preseeded_db.store
+split -b 70m preseeded_db.store.gz preseeded_db.store.gz.part-
+
+
+find . \
+  -type d \
+  \( \
+    -name Analytics \
+    -o -name AI \
+    -o -name BarcodeScanner \
+    -o -name CustomViews \
+    -o -name Exercise \
+    -o -name Intents \
+    -o -name Prompt \
+    -o -name Settings \
+    -o -name ShoppingList \
+    -o -name Storage \
+    -o -name Subscriptions \
+    -o -name TrainingPlan \
+    -o -name Pods \
+    -o -name build \
+    -o -name node_modules \
+    -o -name .git \
+  \) -prune -o \
+  -type f \
+  \( \
+    -name '*.swift' \
+    -o -name '*.metal' \
+  \) -print0 |
+while IFS= read -r -d '' file; do
+  fullpath=$(realpath "$file")
+  {
+    printf '==== FILE: %s ====\n' "$fullpath"
+    cat -- "$file"
+    printf '\n\n'
+  } >> merged_output.txt
+done
+
+
+
+find . \
+  -type d \
+  \( \
+    -name Analytics \
+    -o -name AI \
+    -o -name BarcodeScanner \
+    -o -name Calendar \
+    -o -name Exercise \
+    -o -name Fitness \
+    -o -name Food \
+    -o -name Intents \
+    -o -name Nutrient \
+    -o -name Profile \
+    -o -name Prompt \
     -o -name ShoppingList \
     -o -name Storage \
     -o -name Subscriptions \

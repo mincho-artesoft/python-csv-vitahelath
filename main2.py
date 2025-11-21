@@ -1,23 +1,35 @@
-import pandas as pd
+import csv
 
-# 1) Четем CSV файловете
-foods = pd.read_csv("foods_merged.csv")          # има колона: name (+ всички нутриенти)
-enriched = pd.read_csv("enriched_foods.csv")     # колони: ID, Name, description
+# Файлове
+FILE_NAMES = "foods_names_with_id2.csv"
+FILE_MERGED = "foods_merged_with_description.csv"
 
-# 2) Нормализираме имената (без главни/малки, без празни интервали в края/началото)
-foods["name_norm"] = foods["name"].astype(str).str.strip().str.lower()
-enriched["name_norm"] = enriched["Name"].astype(str).str.strip().str.lower()
+def main():
+    # 1. Извличаме всички name от foods_merged_with_description.csv в сет
+    merged_names = set()
 
-# 3) Оставяме само нужните полета от enriched (Name не ни трябва, ако match-ваме по name_norm)
-enriched_small = enriched[["name_norm", "description"]].drop_duplicates(subset=["name_norm"])
+    with open(FILE_MERGED, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            name = row.get("name", "").strip()
+            if name:
+                merged_names.add(name)
 
-# 4) LEFT JOIN от foods към enriched по нормализираното име
-merged = foods.merge(enriched_small, on="name_norm", how="left")
+    print(f"Loaded {len(merged_names)} names from merged file.")
 
-# 5) Премахваме помощната колона name_norm
-merged = merged.drop(columns=["name_norm"])
+    # 2. Проверяваме кои name в foods_names_with_id2.csv липсват
+    missing = []
 
-# 6) Записваме резултата в нов CSV
-merged.to_csv("foods_merged_with_description.csv", index=False)
+    with open(FILE_NAMES, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            name = row.get("name", "").strip()
+            if name and name not in merged_names:
+                missing.append((row.get("id"), name))
 
-print("Готово! Записано е в foods_merged_with_description.csv")
+    print(f"\nMISSING RECORDS ({len(missing)}):")
+    for record in missing:
+        print(record)
+
+if __name__ == "__main__":
+    main()
