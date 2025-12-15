@@ -1,0 +1,1410 @@
+[
+  {
+    "title": "12 Week Total Fat Annihilation Workout Plan",
+    "sections": [
+      {
+        "title": "Fat Loss (Upper Body) Workout 1",
+        "exercises": [
+          {
+            "name": "Dumbbell Bench Press",
+            "sets": 4,
+            "reps": 9,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 9.0 reps x 4s tempo = 2.4 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8-10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Incline Dumbbell Press - Gethin Variation",
+            "sets": 4,
+            "reps": 9,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 9.0 reps x 4s tempo = 2.4 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8-10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Push-Up",
+            "sets": 4,
+            "reps": null,
+            "notes": null,
+            "duration": 7,
+            "calculation_details": " 4.0 sets x 12.0 reps x 4s tempo = 3.2 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets until failure.",
+            "is_time_based": false,
+            "to_failure": true
+          },
+          {
+            "name": "One-Arm Dumbbell Row",
+            "sets": 4,
+            "reps": 10,
+            "notes": null,
+            "duration": 7,
+            "calculation_details": " 4.0 sets x 10.0 reps x 4s tempo = 2.7 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8-12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Seated Cable Rows",
+            "sets": 4,
+            "reps": 10,
+            "notes": null,
+            "duration": 7,
+            "calculation_details": " 4.0 sets x 10.0 reps x 4s tempo = 2.7 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8-12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Pull-up",
+            "sets": 4,
+            "reps": null,
+            "notes": null,
+            "duration": 7,
+            "calculation_details": " 4.0 sets x 12.0 reps x 4s tempo = 3.2 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets until failure.",
+            "is_time_based": false,
+            "to_failure": true
+          },
+          {
+            "name": "Side Lateral Raise",
+            "sets": 2,
+            "reps": 11,
+            "notes": null,
+            "duration": 3,
+            "calculation_details": " 2.0 sets x 11.0 reps x 4s tempo = 1.5 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 10-12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dumbbell front raise",
+            "sets": 2,
+            "reps": 11,
+            "notes": null,
+            "duration": 3,
+            "calculation_details": " 2.0 sets x 11.0 reps x 4s tempo = 1.5 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 10-12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Bent-over dumbbell rear delt fly",
+            "sets": 2,
+            "reps": 11,
+            "notes": null,
+            "duration": 3,
+            "calculation_details": " 2.0 sets x 11.0 reps x 4s tempo = 1.5 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 10-12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Farmers Carry",
+            "sets": 5,
+            "reps": 20,
+            "notes": null,
+            "duration": 12,
+            "calculation_details": " 5.0 sets x 20.0 reps x 4s tempo = 6.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 20 Yards repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Lying oblique crunch",
+            "sets": 2,
+            "reps": 15,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 2.0 sets x 15.0 reps x 4s tempo (Doubled for unilateral movement). = 4.0 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 15 Each.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Hanging knee raise",
+            "sets": 2,
+            "reps": 12,
+            "notes": null,
+            "duration": 4,
+            "calculation_details": " 2.0 sets x 12.0 reps x 4s tempo = 1.6 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Fat Loss (Lower Body) Workout 2",
+        "exercises": [
+          {
+            "name": "Barbell front squat",
+            "sets": 4,
+            "reps": 9,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 9.0 reps x 4s tempo = 2.4 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8-10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dumbbell Goblet Squat",
+            "sets": 4,
+            "reps": 9,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 9.0 reps x 4s tempo = 2.4 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8-10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Rear Bodyweight Lunge",
+            "sets": 4,
+            "reps": null,
+            "notes": null,
+            "duration": 7,
+            "calculation_details": " 4.0 sets x 12.0 reps x 4s tempo = 3.2 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets until failure.",
+            "is_time_based": false,
+            "to_failure": true
+          },
+          {
+            "name": "Stiff-Legged Dumbbell Deadlift",
+            "sets": 4,
+            "reps": 9,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 9.0 reps x 4s tempo = 2.4 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8-10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Lying Leg Curls",
+            "sets": 4,
+            "reps": 9,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 9.0 reps x 4s tempo = 2.4 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8-10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Bodyweight Glute Bridge",
+            "sets": 4,
+            "reps": null,
+            "notes": null,
+            "duration": 7,
+            "calculation_details": " 4.0 sets x 12.0 reps x 4s tempo = 3.2 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets until failure.",
+            "is_time_based": false,
+            "to_failure": true
+          },
+          {
+            "name": "Standing Calf Raises",
+            "sets": 4,
+            "reps": 20,
+            "notes": null,
+            "duration": 9,
+            "calculation_details": " 4.0 sets x 20.0 reps x 4s tempo = 5.3 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 20 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Seated Calf Raise",
+            "sets": 4,
+            "reps": 10,
+            "notes": null,
+            "duration": 7,
+            "calculation_details": " 4.0 sets x 10.0 reps x 4s tempo = 2.7 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Farmers Carry",
+            "sets": 5,
+            "reps": 20,
+            "notes": null,
+            "duration": 12,
+            "calculation_details": " 5.0 sets x 20.0 reps x 4s tempo = 6.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 20 Yards repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Crunch",
+            "sets": 2,
+            "reps": 20,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 2.0 sets x 20.0 reps x 4s tempo = 2.7 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 20 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Reverse crunch",
+            "sets": 2,
+            "reps": 20,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 2.0 sets x 20.0 reps x 4s tempo = 2.7 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 20 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Fat Loss (Full Body) Workout 3",
+        "exercises": [
+          {
+            "name": "Dumbbell squat",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Seated Dumbbell Press",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dumbbell Goblet Squat",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo (Doubled for unilateral movement). = 4.8 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 Each.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Lat pull-down",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Romanian Deadlift",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "T-Bar Row with Handle",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "EZ-Bar Curl",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "EZ-Bar Skullcrusher",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dumbbell farmer's walk",
+            "sets": 4,
+            "reps": 60,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": "Time-based reps detected. 4.0 sets x 1.0 min work. Plus 4.0 mins rest.",
+            "description": "Perform 4 sets of 60 Secs.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Elbow plank",
+            "sets": 3,
+            "reps": 30,
+            "notes": null,
+            "duration": 4,
+            "calculation_details": "Time-based reps detected. 3.0 sets x 0.5 min work. Plus 3.0 mins rest.",
+            "description": "Perform 3 sets of 30 Secs.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Side Bridge",
+            "sets": 3,
+            "reps": 30,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": "Time-based reps detected. 3.0 sets x 0.5 min work (Doubled for unilateral movement).. Plus 3.0 mins rest.",
+            "description": "Perform 3 sets of 30 Secs Each.",
+            "is_time_based": true,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Fat Loss (Full Body) Workout 4",
+        "exercises": [
+          {
+            "name": "Conventional Deadlift",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Push-Up",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Leg Press",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Pull-up",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Hack Squat",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "UNS Inverted row",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Cable straight-bar biceps curl",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Triceps Pushdown",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dumbbell farmer's walk",
+            "sets": 4,
+            "reps": 60,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": "Time-based reps detected. 4.0 sets x 1.0 min work. Plus 4.0 mins rest.",
+            "description": "Perform 4 sets of 60 Secs.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Hanging leg raise",
+            "sets": 2,
+            "reps": 12,
+            "notes": null,
+            "duration": 4,
+            "calculation_details": " 2.0 sets x 12.0 reps x 4s tempo = 1.6 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Russian twist",
+            "sets": 2,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 2.0 sets x 12.0 reps x 4s tempo (Doubled for unilateral movement). = 3.2 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 12 Each.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Extreme Fat Loss: 6 Week Fat Loss Workout Plan",
+    "sections": [
+      {
+        "title": "Day 1: Full Body Fat Loss Circuit",
+        "exercises": [
+          {
+            "name": "Pull-up",
+            "sets": 3,
+            "reps": 8,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 8.0 reps x 4s tempo = 1.6 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Push-Up",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Bodyweight squat",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dip",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Chin-Up",
+            "sets": 3,
+            "reps": 8,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 8.0 reps x 4s tempo = 1.6 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Bodyweight Rear Lunge",
+            "sets": 3,
+            "reps": 15,
+            "notes": null,
+            "duration": 9,
+            "calculation_details": " 3.0 sets x 15.0 reps x 4s tempo (Doubled for unilateral movement). = 6.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 15 Each.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Seated Dumbbell Press",
+            "sets": 3,
+            "reps": 8,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 8.0 reps x 4s tempo = 1.6 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "One-Arm Dumbbell Row",
+            "sets": 3,
+            "reps": 8,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 8.0 reps x 4s tempo = 1.6 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Stiff-Legged Dumbbell Deadlift",
+            "sets": 3,
+            "reps": 8,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 8.0 reps x 4s tempo = 1.6 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Elbow plank",
+            "sets": 3,
+            "reps": 45,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": "Time-based reps detected. 3.0 sets x 0.8 min work. Plus 3.0 mins rest.",
+            "description": "Perform 3 sets of 45 Secs.",
+            "is_time_based": true,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Day 2: Full Body Fat Loss Circuit",
+        "exercises": [
+          {
+            "name": "Barbell Good Morning - Gethin Variation",
+            "sets": 4,
+            "reps": 8,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 8.0 reps x 4s tempo = 2.1 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Barbell forward lunge",
+            "sets": 4,
+            "reps": 8,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 8.0 reps x 4s tempo = 2.1 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Barbell Full Squat",
+            "sets": 4,
+            "reps": 8,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 8.0 reps x 4s tempo = 2.1 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Push-press",
+            "sets": 4,
+            "reps": 8,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 8.0 reps x 4s tempo = 2.1 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dumbbell Bench Press",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "One-Arm Dumbbell Row",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Standing dumbbell shrug",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Machine Ab Crunch",
+            "sets": 5,
+            "reps": 12,
+            "notes": null,
+            "duration": 9,
+            "calculation_details": " 5.0 sets x 12.0 reps x 4s tempo = 4.0 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Day 3: Full Body Fat Loss Circuit",
+        "exercises": [
+          {
+            "name": "Pull-up",
+            "sets": 3,
+            "reps": 6,
+            "notes": null,
+            "duration": 4,
+            "calculation_details": " 3.0 sets x 6.0 reps x 4s tempo = 1.2 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 6 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dip",
+            "sets": 3,
+            "reps": 6,
+            "notes": null,
+            "duration": 4,
+            "calculation_details": " 3.0 sets x 6.0 reps x 4s tempo = 1.2 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 6 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Chin-Up",
+            "sets": 3,
+            "reps": 6,
+            "notes": null,
+            "duration": 4,
+            "calculation_details": " 3.0 sets x 6.0 reps x 4s tempo = 1.2 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 6 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Push-Up",
+            "sets": 3,
+            "reps": 10,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 10.0 reps x 4s tempo = 2.0 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 10 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dumbbell Goblet Squat",
+            "sets": 4,
+            "reps": 8,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 8.0 reps x 4s tempo = 2.1 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Seated Dumbbell Press",
+            "sets": 4,
+            "reps": 8,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 8.0 reps x 4s tempo = 2.1 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "B3. Dumbbell RDL",
+            "sets": 4,
+            "reps": 8,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 8.0 reps x 4s tempo = 2.1 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "B4. Dumbbell Glute Bridge",
+            "sets": 4,
+            "reps": 8,
+            "notes": null,
+            "duration": 6,
+            "calculation_details": " 4.0 sets x 8.0 reps x 4s tempo = 2.1 mins work. Plus 4.0 mins rest (60s/set).",
+            "description": "Perform 4 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Hanging leg raise",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "20 Minute HIIT Workout You Can Do Anywhere",
+    "sections": [
+      {
+        "title": "20 Minute HIIT Workout",
+        "exercises": [
+          {
+            "name": "Forward lunge",
+            "sets": 1,
+            "reps": 45,
+            "notes": null,
+            "duration": 60,
+            "calculation_details": "Time-based reps detected. 45.0 sets x 0.3 min work. Plus 45.0 mins rest.",
+            "description": "Perform intervals of 40-50 sec work followed by 10-20 sec rest.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Bodyweight squat",
+            "sets": 1,
+            "reps": 45,
+            "notes": null,
+            "duration": 60,
+            "calculation_details": "Time-based reps detected. 45.0 sets x 0.3 min work. Plus 45.0 mins rest.",
+            "description": "Perform intervals of 40-50 sec work followed by 10-20 sec rest.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Mountain climber",
+            "sets": 1,
+            "reps": 45,
+            "notes": null,
+            "duration": 60,
+            "calculation_details": "Time-based reps detected. 45.0 sets x 0.3 min work. Plus 45.0 mins rest.",
+            "description": "Perform intervals of 40-50 sec work followed by 10-20 sec rest.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Running in Place",
+            "sets": 1,
+            "reps": 45,
+            "notes": null,
+            "duration": 60,
+            "calculation_details": "Time-based reps detected. 45.0 sets x 0.3 min work. Plus 45.0 mins rest.",
+            "description": "Perform intervals of 40-50 sec work followed by 10-20 sec rest.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Burpee",
+            "sets": 1,
+            "reps": 45,
+            "notes": null,
+            "duration": 60,
+            "calculation_details": "Time-based reps detected. 45.0 sets x 0.3 min work. Plus 45.0 mins rest.",
+            "description": "Perform intervals of 40-50 sec work followed by 10-20 sec rest.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "High Kick",
+            "sets": 1,
+            "reps": 45,
+            "notes": null,
+            "duration": 60,
+            "calculation_details": "Time-based reps detected. 45.0 sets x 0.3 min work. Plus 45.0 mins rest.",
+            "description": "Perform intervals of 40-50 sec work followed by 10-20 sec rest.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Hand Chest Press and Row",
+            "sets": 1,
+            "reps": 45,
+            "notes": null,
+            "duration": 60,
+            "calculation_details": "Time-based reps detected. 45.0 sets x 0.3 min work. Plus 45.0 mins rest.",
+            "description": "Perform intervals of 40-50 sec work followed by 10-20 sec rest.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Sit-up",
+            "sets": 1,
+            "reps": 45,
+            "notes": null,
+            "duration": 60,
+            "calculation_details": "Time-based reps detected. 45.0 sets x 0.3 min work. Plus 45.0 mins rest.",
+            "description": "Perform intervals of 40-50 sec work followed by 10-20 sec rest.",
+            "is_time_based": true,
+            "to_failure": false
+          },
+          {
+            "name": "Ab bicycle",
+            "sets": 1,
+            "reps": 45,
+            "notes": null,
+            "duration": 90,
+            "calculation_details": "Time-based reps detected. 45.0 sets x 1.0 min work. Plus 45.0 mins rest.",
+            "description": "Perform intervals of 40-50 sec work followed by 1 minute rest.",
+            "is_time_based": true,
+            "to_failure": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "12 Week Women's Bikini Prep Workout Program",
+    "sections": [
+      {
+        "title": "Day 1: Shoulders",
+        "exercises": [
+          {
+            "name": "Arnold press",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Smith machine shoulder press",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Strict Overhead Press",
+            "sets": 5,
+            "reps": null,
+            "notes": null,
+            "duration": 9,
+            "calculation_details": " 5.0 sets x 12.0 reps x 4s tempo = 4.0 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets until failure.",
+            "is_time_based": false,
+            "to_failure": true
+          },
+          {
+            "name": "4. Single Arm Lateral Machine Raise",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "5. Partial Lateral Raise",
+            "sets": 3,
+            "reps": null,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets until failure.",
+            "is_time_based": false,
+            "to_failure": true
+          }
+        ]
+      },
+      {
+        "title": "Day 2: Back",
+        "exercises": [
+          {
+            "name": "Lat pull-down",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "2. Hammer Strength High Row Machine",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Reverse Barbell Row",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "4. Rear Delt Fly Machine",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Lying Dumbbell Pullover",
+            "sets": 2,
+            "reps": 50,
+            "notes": null,
+            "duration": 9,
+            "calculation_details": " 2.0 sets x 50.0 reps x 4s tempo = 6.7 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets of 50 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Day 3: Legs",
+        "exercises": [
+          {
+            "name": "Box Squats",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Barbell Deadlift",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "3. Reverse Hack Squat",
+            "sets": 3,
+            "reps": 12,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 12.0 reps x 4s tempo = 2.4 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 12 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dumbbell Goblet Squat",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Jump Squat",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Glute Bridges",
+            "sets": 2,
+            "reps": null,
+            "notes": null,
+            "duration": 4,
+            "calculation_details": " 2.0 sets x 12.0 reps x 4s tempo = 1.6 mins work. Plus 2.0 mins rest (60s/set).",
+            "description": "Perform 2 sets until failure.",
+            "is_time_based": false,
+            "to_failure": true
+          }
+        ]
+      },
+      {
+        "title": "Day 4: Arms",
+        "exercises": [
+          {
+            "name": "EZ Bar Curls",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Dumbbell Alternate Bicep Curl",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Straight Bar Tricep Pressdown",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Tricep Cable Overhead Extension",
+            "sets": 5,
+            "reps": 8,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " 5.0 sets x 8.0 reps x 4s tempo = 2.7 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Rope Tricep Pressdown",
+            "sets": 3,
+            "reps": 8,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 8.0 reps x 4s tempo = 1.6 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "5b. 5 Second Isometric Bicep Contractions",
+            "sets": 3,
+            "reps": 8,
+            "notes": null,
+            "duration": 5,
+            "calculation_details": " 3.0 sets x 8.0 reps x 4s tempo = 1.6 mins work. Plus 3.0 mins rest (60s/set).",
+            "description": "Perform 3 sets of 8 repetitions.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "5 Week Full Body Kettlebell Workout",
+    "sections": [
+      {
+        "title": "Day 1",
+        "exercises": [
+          {
+            "name": "Kettlebell Single-Arm Snatch",
+            "sets": 15,
+            "reps": 10,
+            "notes": null,
+            "duration": 25,
+            "calculation_details": " Reps missing/failure, used default. 15.0 sets x 10.0 reps x 4s tempo = 10.0 mins work. Plus 15.0 mins rest (60s/set).",
+            "description": "Perform 15 sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Kettlebell Swings",
+            "sets": 15,
+            "reps": 10,
+            "notes": null,
+            "duration": 25,
+            "calculation_details": " Reps missing/failure, used default. 15.0 sets x 10.0 reps x 4s tempo = 10.0 mins work. Plus 15.0 mins rest (60s/set).",
+            "description": "Perform 15 sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Alternating Lunges",
+            "sets": 10,
+            "reps": 10,
+            "notes": null,
+            "duration": 17,
+            "calculation_details": " Reps missing/failure, used default. 10.0 sets x 10.0 reps x 4s tempo = 6.7 mins work. Plus 10.0 mins rest (60s/set).",
+            "description": "Perform 10 per side sets.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Day 2",
+        "exercises": [
+          {
+            "name": "Kettlebell Push Press",
+            "sets": 12,
+            "reps": 10,
+            "notes": null,
+            "duration": 20,
+            "calculation_details": " Reps missing/failure, used default. 12.0 sets x 10.0 reps x 4s tempo = 8.0 mins work. Plus 12.0 mins rest (60s/set).",
+            "description": "Perform 12 sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Kettlebell Suitcase Deadlift",
+            "sets": 12,
+            "reps": 10,
+            "notes": null,
+            "duration": 20,
+            "calculation_details": " Reps missing/failure, used default. 12.0 sets x 10.0 reps x 4s tempo = 8.0 mins work. Plus 12.0 mins rest (60s/set).",
+            "description": "Perform 12 sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Kettlebell Single-Arm Row",
+            "sets": 10,
+            "reps": 10,
+            "notes": null,
+            "duration": 17,
+            "calculation_details": " Reps missing/failure, used default. 10.0 sets x 10.0 reps x 4s tempo = 6.7 mins work. Plus 10.0 mins rest (60s/set).",
+            "description": "Perform 10 per side sets.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Day 3",
+        "exercises": [
+          {
+            "name": "Reverse lunge",
+            "sets": 12,
+            "reps": 10,
+            "notes": null,
+            "duration": 20,
+            "calculation_details": " Reps missing/failure, used default. 12.0 sets x 10.0 reps x 4s tempo = 8.0 mins work. Plus 12.0 mins rest (60s/set).",
+            "description": "Perform 12 per side sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Kettlebell Single-Arm Swing",
+            "sets": 12,
+            "reps": 10,
+            "notes": null,
+            "duration": 20,
+            "calculation_details": " Reps missing/failure, used default. 12.0 sets x 10.0 reps x 4s tempo = 8.0 mins work. Plus 12.0 mins rest (60s/set).",
+            "description": "Perform 12 per side sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Kettlebell Goblet Squat",
+            "sets": 15,
+            "reps": 10,
+            "notes": null,
+            "duration": 25,
+            "calculation_details": " Reps missing/failure, used default. 15.0 sets x 10.0 reps x 4s tempo = 10.0 mins work. Plus 15.0 mins rest (60s/set).",
+            "description": "Perform 15 sets.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Day 4",
+        "exercises": [
+          {
+            "name": "Kettlebell Lunge",
+            "sets": 15,
+            "reps": 10,
+            "notes": null,
+            "duration": 25,
+            "calculation_details": " Reps missing/failure, used default. 15.0 sets x 10.0 reps x 4s tempo = 10.0 mins work. Plus 15.0 mins rest (60s/set).",
+            "description": "Perform 15 per side sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Barbell upright row",
+            "sets": 15,
+            "reps": 10,
+            "notes": null,
+            "duration": 25,
+            "calculation_details": " Reps missing/failure, used default. 15.0 sets x 10.0 reps x 4s tempo = 10.0 mins work. Plus 15.0 mins rest (60s/set).",
+            "description": "Perform 15 sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Hollow Body Hold",
+            "sets": 12,
+            "reps": 10,
+            "notes": null,
+            "duration": 20,
+            "calculation_details": " Reps missing/failure, used default. 12.0 sets x 10.0 reps x 4s tempo = 8.0 mins work. Plus 12.0 mins rest (60s/set).",
+            "description": "Perform 12 sets.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      },
+      {
+        "title": "Day 5",
+        "exercises": [
+          {
+            "name": "Single-Leg Kettlebell Split Squat",
+            "sets": 10,
+            "reps": 10,
+            "notes": null,
+            "duration": 17,
+            "calculation_details": " Reps missing/failure, used default. 10.0 sets x 10.0 reps x 4s tempo = 6.7 mins work. Plus 10.0 mins rest (60s/set).",
+            "description": "Perform 10 per side sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Standing Kettlebell Shoulder Press",
+            "sets": 10,
+            "reps": 10,
+            "notes": null,
+            "duration": 17,
+            "calculation_details": " Reps missing/failure, used default. 10.0 sets x 10.0 reps x 4s tempo = 6.7 mins work. Plus 10.0 mins rest (60s/set).",
+            "description": "Perform 10 sets.",
+            "is_time_based": false,
+            "to_failure": false
+          },
+          {
+            "name": "Turkish Get Ups",
+            "sets": 5,
+            "reps": 10,
+            "notes": null,
+            "duration": 8,
+            "calculation_details": " Reps missing/failure, used default. 5.0 sets x 10.0 reps x 4s tempo = 3.3 mins work. Plus 5.0 mins rest (60s/set).",
+            "description": "Perform 5 sets.",
+            "is_time_based": false,
+            "to_failure": false
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,95 +1,77 @@
 import json
-import csv
 import os
 
-def load_csv_titles(csv_filename):
-    """Зарежда заглавията от CSV файла в set за бързо търсене."""
-    titles = set()
-    
-    if not os.path.exists(csv_filename):
-        print(f"ГРЕШКА: Файлът '{csv_filename}' не е намерен!")
-        return titles
+def split_workout_plans(input_files, chunk_size=5, output_folder="split_output_files"):
+    all_plans = []
 
-    try:
-        with open(csv_filename, mode='r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                # Използваме 'Title', както посочи в описанието
-                if 'Title' in row and row['Title']:
-                    # Нормализираме: малки букви и махане на спейсове отпред/отзад
-                    titles.add(row['Title'].strip().lower())
-    except Exception as e:
-        print(f"Грешка при четене на CSV: {e}")
-        
-    return titles
+    print("--- Започва четенето на файловете ---")
+    
+    # 1. Четене и обединяване на данните
+    for filename in input_files:
+        if os.path.exists(filename):
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        all_plans.extend(data)
+                        print(f"Успешно зареден: {filename} ({len(data)} плана)")
+                    else:
+                        print(f"Внимание: {filename} не съдържа списък и ще бъде пропуснат.")
+            except Exception as e:
+                print(f"Грешка при четене на {filename}: {e}")
+        else:
+            print(f"Файлът липсва: {filename}")
 
-def check_exercises_against_csv():
-    csv_filename = "lll_completed_normalized.csv"
+    total_plans = len(all_plans)
+    print(f"\nОбщо намерени планове: {total_plans}")
     
-    # 1. Зареждане на валидните имена от CSV
-    print("Зареждане на данни от CSV...")
-    csv_titles_normalized = load_csv_titles(csv_filename)
-    
-    if not csv_titles_normalized:
-        print("Няма заредени заглавия или файлът е празен. Спиране.")
+    if total_plans == 0:
+        print("Няма данни за обработка.")
         return
 
-    print(f"Заредени са {len(csv_titles_normalized)} уникални упражнения от CSV файла.\n")
+    # 2. Създаване на папката, ако не съществува
+    if not os.path.exists(output_folder):
+        try:
+            os.makedirs(output_folder)
+            print(f"Създадена е папка: {output_folder}")
+        except OSError as e:
+            print(f"Грешка при създаване на папка: {e}")
+            return
+    else:
+        print(f"Папката '{output_folder}' вече съществува. Файловете ще бъдат записани там.")
 
-    # Генериране на имената на JSON файловете
-    json_files = [f"plans_part_0{i}_of_05_updated.json" for i in range(1, 6)]
+    # 3. Разбиване на части и записване в папката
+    print(f"\n--- Започва разбиване на файлове по {chunk_size} плана ---")
     
-    # Сет за съхранение на липсващите упражнения (за да избегнем дубликати при принтиране)
-    missing_exercises = set()
-    total_checked = 0
-
-    # 2. Обхождане на JSON файловете
-    for json_file in json_files:
-        if not os.path.exists(json_file):
-            print(f"Липсва файл: {json_file}. Пропускане...")
-            continue
+    part_num = 1
+    for i in range(0, total_plans, chunk_size):
+        chunk = all_plans[i : i + chunk_size]
+        
+        filename = f"final_plans_batch_{part_num:03d}.json"
+        # Създаваме пълния път: папка/име_на_файл
+        output_path = os.path.join(output_folder, filename)
         
         try:
-            with open(json_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                
-                # JSON структура: List -> Plan -> sections -> exercises
-                for plan in data:
-                    sections = plan.get('sections', [])
-                    if not sections: continue
-                    
-                    for section in sections:
-                        exercises = section.get('exercises', [])
-                        if not exercises: continue
-                        
-                        for exercise in exercises:
-                            ex_name = exercise.get('name')
-                            
-                            if ex_name:
-                                total_checked += 1
-                                # Нормализираме името от JSON за проверка
-                                ex_name_norm = ex_name.strip().lower()
-                                
-                                # Проверка дали съществува в CSV списъка
-                                if ex_name_norm not in csv_titles_normalized:
-                                    # Добавяме оригиналното име (не нормализираното), за да знаеш как точно е написано в JSON-а
-                                    missing_exercises.add(ex_name)
-                                    
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(chunk, f, ensure_ascii=False, indent=2)
+            print(f"Записан: {output_path} (съдържа {len(chunk)} плана)")
+            part_num += 1
         except Exception as e:
-            print(f"Грешка при обработка на {json_file}: {e}")
+            print(f"Грешка при запис на {output_path}: {e}")
 
-    # 3. Принтиране на резултатите
-    print("-" * 60)
-    print(f"РЕЗУЛТАТ: Проверени са общо {total_checked} упражнения в JSON файловете.")
-    
-    if missing_exercises:
-        print(f"Открити са {len(missing_exercises)} уникални имена, които ЛИПСВАТ в CSV файла:")
-        print("-" * 60)
-        for missing in sorted(list(missing_exercises)):
-            print(f"[ЛИПСВА] {missing}")
-    else:
-        print("СУПЕР! Всички упражнения от JSON файловете съществуват в CSV файла.")
-    print("-" * 60)
+    print(f"\nГотово! Всички {part_num-1} файла са в папка '{output_folder}'.")
 
+# Списък с входните файлове
+files_list = [
+    "plans_part_01_of_05_updated.json",
+    "plans_part_02_of_05_updated.json",
+    "plans_part_03_of_05_updated.json",
+    "plans_part_04_of_05_updated.json",
+    "plans_part_05_of_05_updated.json"
+]
+
+# Изпълнение
 if __name__ == "__main__":
-    check_exercises_against_csv()
+    # chunk_size=5 означава по 5 плана във файл
+    # output_folder е името на папката, където ще се запишат
+    split_workout_plans(files_list, chunk_size=5, output_folder="split_output_files")
